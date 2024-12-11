@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 11, 2024 at 07:24 PM
+-- Generation Time: Dec 11, 2024 at 07:35 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -48,9 +48,9 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `course_id`, `date`, `start_time`, `end_time`, `status`, `created_at`, `updated_at`, `session_name`, `description`, `room`, `session_date`, `created_by`) VALUES
-(20, 11, '2024-12-12', '00:52:00', '12:59:00', 'scheduled', '2024-12-11 17:52:50', '2024-12-11 17:52:50', 'IDK', 'HI', 'W3', NULL, NULL),
-(21, 11, '2024-12-11', '10:03:00', '16:03:00', 'scheduled', '2024-12-11 18:03:48', '2024-12-11 18:03:48', 'IDK2', 'adad', '23', NULL, NULL),
-(22, 11, '2024-12-12', '01:10:00', '04:11:00', 'scheduled', '2024-12-11 18:11:05', '2024-12-11 18:11:05', 'IDK', 'Hello', '23', NULL, NULL);
+(20, 11, '2024-12-12', '00:52:00', '12:59:00', 'ongoing', '2024-12-11 17:52:50', '2024-12-11 18:25:36', 'IDK', 'HI', 'W3', NULL, NULL),
+(21, 11, '2024-12-11', '10:03:00', '16:03:00', 'completed', '2024-12-11 18:03:48', '2024-12-11 18:25:36', 'IDK2', 'adad', '23', NULL, NULL),
+(23, 11, '2024-12-14', '08:26:00', '11:30:00', 'scheduled', '2024-12-11 18:26:53', '2024-12-11 18:26:53', 'Working?', 'HI', 'W3', NULL, NULL);
 
 --
 -- Triggers `sessions`
@@ -90,7 +90,7 @@ ALTER TABLE `sessions`
 -- AUTO_INCREMENT for table `sessions`
 --
 ALTER TABLE `sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- Constraints for dumped tables

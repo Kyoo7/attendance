@@ -2,25 +2,65 @@
 require_once '../includes/header.php';
 require_once '../config/database.php';
 
-// Fetch courses
-$stmt = $conn->query("SELECT * FROM courses WHERE status = 'active' LIMIT 1");
-$course = $stmt->fetch();
+// Set timezone to Asia/Jakarta
+date_default_timezone_set('Asia/Jakarta');
 
-// Fetch students for the course
-$stmt = $conn->prepare("SELECT u.* FROM users u 
-                       JOIN enrollments e ON u.id = e.student_id 
-                       WHERE e.course_id = ? AND u.role = 'student'");
-$stmt->execute([$course['id']]);
-$students = $stmt->fetchAll();
+// Get current date and time
+$currentDate = date('Y-m-d');
+$currentTime = date('H:i:s');
 
-// Fetch current session
-$stmt = $conn->prepare("SELECT * FROM sessions WHERE course_id = ? AND date = CURDATE() LIMIT 1");
-$stmt->execute([$course['id']]);
-$currentSession = $stmt->fetch();
+// Get lecturer ID from session
+$lecturer_id = $_SESSION['user_id'];
+
+// Fetch all courses for the lecturer
+$stmt = $conn->prepare("SELECT * FROM courses WHERE lecturer_id = ? AND status = 'active'");
+$stmt->execute([$lecturer_id]);
+$courses = $stmt->fetchAll();
+
+// Fetch current session (if any)
+$stmt = $conn->prepare("
+    SELECT s.*, c.course_name, c.course_code 
+    FROM sessions s
+    JOIN courses c ON s.course_id = c.id
+    WHERE s.date = ?
+    AND s.status = 'ongoing'
+    LIMIT 1
+");
+$stmt->execute([$currentDate]);
+$currentSession = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// If no current session, fetch next upcoming session
+if (!$currentSession) {
+    $stmt = $conn->prepare("
+        SELECT s.*, c.course_name, c.course_code 
+        FROM sessions s
+        JOIN courses c ON s.course_id = c.id
+        WHERE c.lecturer_id = ? 
+        AND ((s.date = ? AND s.start_time > ?) 
+             OR s.date > ?)
+        AND s.status = 'scheduled'
+        ORDER BY s.date ASC, s.start_time ASC
+        LIMIT 1
+    ");
+    $stmt->execute([$lecturer_id, $currentDate, $currentTime, $currentDate]);
+    $upcomingSession = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// Fetch students if there's a current session
+$students = [];
+if ($currentSession) {
+    $stmt = $conn->prepare("
+        SELECT u.* FROM users u 
+        JOIN enrollments e ON u.id = e.student_id 
+        WHERE e.course_id = ? AND u.role = 'student'
+    ");
+    $stmt->execute([$currentSession['course_id']]);
+    $students = $stmt->fetchAll();
+}
 
 // Fetch teacher info
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ? AND role = 'lecturer'");
-$stmt->execute([$course['lecturer_id']]);
+$stmt->execute([$lecturer_id]);
 $teacher = $stmt->fetch();
 
 ?>
@@ -32,12 +72,12 @@ $teacher = $stmt->fetch();
     <title>Teacher Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-50">
+<body>
     <div class="flex min-h-screen">
         <!-- Main Content -->
         <div class="flex-1">
             <!-- Header -->
-            <header class="bg-white p-4 flex justify-between items-center border-b">
+            <header class="p-4 flex justify-between items-center">
                 <h1 class="text-xl">Hello <?php echo htmlspecialchars($teacher['full_name']); ?>, Welcome To Your Class Today!</h1>
                 <div class="flex items-center gap-4">
                     <button class="p-2">🔔</button>
@@ -47,6 +87,67 @@ $teacher = $stmt->fetch();
                     </div>
                 </div>
             </header>
+
+            <!-- Session Information Card -->
+            <div class="p-6">
+                <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border">
+                    <?php if ($currentSession): ?>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-semibold text-purple-600">Current Session</h2>
+                            <span class="px-4 py-1 bg-green-100 text-green-800 rounded-full text-sm">In Progress</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-600">Course</p>
+                                <p class="font-semibold"><?php echo htmlspecialchars($currentSession['course_name']); ?> (<?php echo htmlspecialchars($currentSession['course_code']); ?>)</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Room</p>
+                                <p class="font-semibold"><?php echo htmlspecialchars($currentSession['room']); ?></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Time</p>
+                                <p class="font-semibold"><?php echo date('h:i A', strtotime($currentSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($currentSession['end_time'])); ?></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Session Name</p>
+                                <p class="font-semibold"><?php echo htmlspecialchars($currentSession['session_name']); ?></p>
+                            </div>
+                        </div>
+                    <?php elseif (isset($upcomingSession)): ?>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-semibold text-purple-600">Upcoming Session</h2>
+                            <span class="px-4 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Scheduled</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-600">Course</p>
+                                <p class="font-semibold"><?php echo htmlspecialchars($upcomingSession['course_name']); ?> (<?php echo htmlspecialchars($upcomingSession['course_code']); ?>)</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Room</p>
+                                <p class="font-semibold"><?php echo htmlspecialchars($upcomingSession['room']); ?></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Date & Time</p>
+                                <p class="font-semibold">
+                                    <?php echo date('M d, Y', strtotime($upcomingSession['date'])); ?><br>
+                                    <?php echo date('h:i A', strtotime($upcomingSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($upcomingSession['end_time'])); ?>
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Session Name</p>
+                                <p class="font-semibold"><?php echo htmlspecialchars($upcomingSession['session_name']); ?></p>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-8">
+                            <h2 class="text-2xl font-semibold text-gray-600">No Sessions Scheduled</h2>
+                            <p class="text-gray-500 mt-2">There are no current or upcoming sessions scheduled.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <!-- Student List Section -->
             <div class="p-6">
@@ -98,19 +199,8 @@ $teacher = $stmt->fetch();
         </div>
 
         <!-- Right Sidebar -->
-        <div class="w-80 bg-white border-l p-6">
+        <div class="w-80 p-6">
             <div class="space-y-6">
-                <div>
-                    <h2 class="text-xl font-semibold mb-4">Class Info</h2>
-                    <div class="bg-white rounded-lg p-4 border">
-                        <h3 class="text-purple-600 text-lg font-semibold"><?php echo htmlspecialchars($course['course_name']); ?></h3>
-                        <ul class="mt-4 space-y-2">
-                            <li class="text-gray-600"><?php echo htmlspecialchars($course['course_code']); ?></li>
-                            <li class="text-gray-600"><?php echo htmlspecialchars($course['description']); ?></li>
-                        </ul>
-                    </div>
-                </div>
-
                 <div>
                     <div class="text-gray-500"><?php echo date('F'); ?></div>
                     <div class="text-6xl font-light text-gray-400"><?php echo date('d'); ?></div>
@@ -144,4 +234,3 @@ $teacher = $stmt->fetch();
     </script>
 </body>
 </html>
-
