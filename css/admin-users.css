@@ -1,0 +1,351 @@
+/* User Management Page Styles */
+:root {
+    --primary-color: #8c0055;
+    --primary-light: rgba(128, 0, 32, 0.1);
+    --text-color: #2D3748;
+    --border-color: #E2E8F0;
+    --background-color: #F7FAFC;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.content-wrapper {
+    padding: 2rem;
+    background-color: var(--background-color);
+    min-height: calc(100vh - 4rem);
+}
+
+/* Welcome Header */
+.welcome-header {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.welcome-header h1 {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.user-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #64748B;
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    color: var(--text-color);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-add:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--hover-shadow);
+}
+
+/* Alert Messages */
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert.success {
+    background: #DCFCE7;
+    color: #059669;
+}
+
+.alert.error {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+/* Filter Section */
+.filter-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.role-filters {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.filter-btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    color: #64748B;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: #F1F5F9;
+}
+
+.filter-btn:hover {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.filter-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.search-box {
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+.search-box form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.search-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-btn:hover {
+    background: #660019;
+}
+
+/* Table Styles */
+.table-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.data-table th,
+.data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background: #F8FAFC;
+    font-weight: 600;
+    color: #64748B;
+}
+
+.data-table tr:hover {
+    background: #F8FAFC;
+}
+
+.profile-cell {
+    width: 50px;
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.badge-admin {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.badge-student {
+    background: #E0E7FF;
+    color: #4F46E5;
+}
+
+.badge-lecturer {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: #DCFCE7;
+    color: #059669;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+.action-btn {
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+}
+
+.edit-btn {
+    background: #3B82F6;
+}
+
+.view-btn {
+    background: #10B981;
+}
+
+.delete-btn {
+    background: #EF4444;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--hover-shadow);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.page-btn {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background: white;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.page-btn:hover {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.page-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.page-dots {
+    display: flex;
+    align-items: center;
+    color: #64748B;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 1rem;
+    }
+
+    .welcome-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .role-filters {
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+
+    .search-box {
+        max-width: none;
+    }
+
+    .data-table {
+        font-size: 0.875rem;
+    }
+
+    .actions-cell {
+        flex-wrap: wrap;
+    }
+}
