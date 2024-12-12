@@ -143,24 +143,34 @@ try {
             <?php else: ?>
                 <div class="sessions-list">
                     <?php foreach ($sessions as $session): ?>
-                        <div class="session-card">
+                        <?php
+                            $current_date = date('Y-m-d');
+                            $current_time = date('H:i:s');
+                            $session_date = $session['date'];
+                            $session_time = $session['start_time'];
+                            
+                            // Determine session status
+                            if ($session_date < $current_date || ($session_date == $current_date && $session_time < $current_time)) {
+                                $status = 'completed';
+                            } elseif ($session_date == $current_date && 
+                                    strtotime($session_time) <= strtotime('+1 hour') && 
+                                    strtotime($session_time) >= strtotime('-1 hour')) {
+                                $status = 'ongoing';
+                            } else {
+                                $status = 'pending';
+                            }
+                        ?>
+                        <div class="session-card" onclick="showSessionAttendance(<?php echo $session['id']; ?>)">
                             <div class="session-info">
-                            <h4><?php echo htmlspecialchars($session['session_name']); ?></h4>
+                                <h4><?php echo htmlspecialchars($session['session_name']); ?></h4>
                                 <p>Time: <?php echo date('h:i A', strtotime($session['start_time'])); ?> - <?php echo date('h:i A', strtotime($session['end_time'])); ?></p>
-                                <p>Room: <?php echo htmlspecialchars($session['room']); ?></p>
                                 <p>Date: <?php echo date('M d, Y', strtotime($session['date'])); ?></p>
-
+                                <p>Room: <?php echo htmlspecialchars($session['room']); ?></p>
                             </div>
                             <div class="session-actions">
-                            <span class="session-status <?php echo $session['status']; ?>">
-                                    <?php echo ucfirst($session['status']); ?>
+                                <span class="session-status <?php echo $status; ?>">
+                                    <?php echo ucfirst($status); ?>
                                 </span>
-                                <button class="btn-secondary" onclick="location.href='edit-session.php?id=<?php echo $session['id']; ?>'">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-danger" onclick="confirmDeleteSession(<?php echo $session['id']; ?>)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -218,6 +228,22 @@ try {
                 <button onclick="downloadQR()" class="btn-secondary">
                     <i class="fas fa-download"></i> Download QR
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Session Attendance Modal -->
+<div id="sessionAttendanceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Session Attendance</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="sessionInfo"></div>
+            <div id="attendanceList">
+                <div class="loading">Loading attendance data...</div>
             </div>
         </div>
     </div>
@@ -291,15 +317,91 @@ function confirmDeleteCourse(courseId) {
 }
 
 // Close modal when clicking the X or outside the modal
-document.querySelector('.close').onclick = function() {
-    document.getElementById('inviteModal').style.display = "none";
-}
+document.querySelectorAll('.close').forEach(closeBtn => {
+    closeBtn.onclick = function() {
+        this.closest('.modal').style.display = "none";
+    }
+});
 
 window.onclick = function(event) {
-    const modal = document.getElementById('inviteModal');
-    if (event.target == modal) {
-        modal.style.display = "none";
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = "none";
     }
+}
+
+async function showSessionAttendance(sessionId) {
+    const modal = document.getElementById('sessionAttendanceModal');
+    const sessionInfo = document.getElementById('sessionInfo');
+    const attendanceList = document.getElementById('attendanceList');
+    
+    modal.style.display = 'block';
+    attendanceList.innerHTML = '<div class="loading">Loading attendance data...</div>';
+    
+    try {
+        const response = await fetch(`../api/get_session_attendance.php?session_id=${sessionId}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.message);
+        }
+        
+        // Update session info
+        sessionInfo.innerHTML = `
+            <div class="session-header">
+                <h4>${data.session.session_name}</h4>
+                <span class="status ${data.session.status}">${data.session.status}</span>
+            </div>
+            <div class="session-details">
+                <p>Date: ${data.session.date}</p>
+                <p>Time: ${data.session.start_time} - ${data.session.end_time}</p>
+                <p>Room: ${data.session.room || 'Not specified'}</p>
+            </div>
+        `;
+        
+        // Create attendance table
+        let tableHtml = `
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        data.attendance.forEach(student => {
+            tableHtml += `
+                <tr>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td><span class="status-badge ${student.status.toLowerCase()}">${student.status}</span></td>
+                    <td>${student.attendance_time || '-'}</td>
+                </tr>
+            `;
+        });
+        
+        tableHtml += '</tbody></table>';
+        attendanceList.innerHTML = tableHtml;
+        
+    } catch (error) {
+        attendanceList.innerHTML = `<div class="error">Failed to load attendance data: ${error.message}</div>`;
+        console.error('Error:', error);
+    }
+}
+
+// Close modal when clicking the close button or outside
+window.onclick = function(event) {
+    const modal = document.getElementById('sessionAttendanceModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+document.querySelector('.close').onclick = function() {
+    document.getElementById('sessionAttendanceModal').style.display = 'none';
 }
 </script>
 
@@ -363,6 +465,12 @@ window.onclick = function(event) {
     background: #f8f9fa;
     border-radius: 6px;
     border: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.session-card:hover {
+    transform: translateY(-2px);
 }
 
 .session-actions {
@@ -494,5 +602,146 @@ window.onclick = function(event) {
 #qrCode {
     margin: 20px 0;
     text-align: center;
+}
+
+.modal-lg {
+    width: 90%;
+    max-width: 1200px;
+}
+
+.session-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: #666;
+    margin-right: 8px;
+}
+
+.attendance-list {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.attendance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.attendance-table-container {
+    overflow-x: auto;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.attendance-table th,
+.attendance-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.attendance-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.stats-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-right: 4px;
+}
+
+.session-card {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.session-card:hover {
+    transform: translateY(-2px);
+}
+
+.session-status {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.session-status.completed {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.session-status.ongoing {
+    background: #d4edda;
+    color: #155724;
+}
+
+.session-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.status-badge.present {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.absent {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error {
+    color: #721c24;
+    background: #f8d7da;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
 }
 </style>

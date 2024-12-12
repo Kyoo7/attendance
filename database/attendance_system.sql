@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 12, 2024 at 10:12 AM
+-- Generation Time: Dec 12, 2024 at 04:09 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -115,7 +115,8 @@ INSERT INTO `activities` (`id`, `user_id`, `action_type`, `entity_type`, `entity
 (70, 1, 'update', '', 1, 'Profile Picture', 'Updated profile picture', '2024-12-12 08:41:48'),
 (71, 1, 'update', '', 1, 'Dr. John Smith', 'Updated profile information', '2024-12-12 08:41:50'),
 (72, 1, 'update', '', 1, 'Dr. John Smith', 'Updated profile information', '2024-12-12 08:41:50'),
-(73, 1, 'update', '', 1, 'Ainee', 'Updated profile information', '2024-12-12 08:53:27');
+(73, 1, 'update', '', 1, 'Ainee', 'Updated profile information', '2024-12-12 08:53:27'),
+(74, 1, 'update', '', 23, 'Working?', 'Updated session \'Working?\' in course \'Management Information System\'', '2024-12-12 14:52:23');
 
 -- --------------------------------------------------------
 
@@ -125,14 +126,76 @@ INSERT INTO `activities` (`id`, `user_id`, `action_type`, `entity_type`, `entity
 
 CREATE TABLE `attendance` (
   `id` int(11) NOT NULL,
-  `student_id` int(11) DEFAULT NULL,
+  `student_id` int(11) NOT NULL,
   `course_id` int(11) DEFAULT NULL,
   `attendance_date` date DEFAULT NULL,
   `status` enum('present','absent','late') NOT NULL,
+  `marked_by` int(11) DEFAULT NULL,
+  `time_marked` timestamp NULL DEFAULT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
   `qr_code_used` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `session_id` int(11) DEFAULT NULL
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `session_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `attendance`
+--
+
+INSERT INTO `attendance` (`id`, `student_id`, `course_id`, `attendance_date`, `status`, `marked_by`, `time_marked`, `latitude`, `longitude`, `notes`, `qr_code_used`, `created_at`, `updated_at`, `session_id`) VALUES
+(13, 2, 11, NULL, 'present', 1, '2024-12-12 09:25:38', NULL, NULL, NULL, NULL, '2024-12-12 09:25:34', '2024-12-12 09:25:38', 25),
+(14, 2, 11, NULL, 'present', 1, '2024-12-12 14:54:33', NULL, NULL, NULL, NULL, '2024-12-12 14:52:28', '2024-12-12 14:54:33', 23),
+(15, 3, 11, NULL, 'present', 1, '2024-12-12 14:54:34', NULL, NULL, NULL, NULL, '2024-12-12 14:52:32', '2024-12-12 14:54:34', 23),
+(16, 4, 11, NULL, 'late', 1, '2024-12-12 14:54:36', NULL, NULL, NULL, NULL, '2024-12-12 14:52:33', '2024-12-12 14:54:36', 23),
+(17, 5, 11, NULL, 'absent', 1, '2024-12-12 14:54:37', NULL, NULL, NULL, NULL, '2024-12-12 14:52:34', '2024-12-12 14:54:37', 23);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `attendance_logs`
+--
+
+CREATE TABLE `attendance_logs` (
+  `id` int(11) NOT NULL,
+  `attendance_id` int(11) NOT NULL,
+  `previous_status` enum('present','late','absent') DEFAULT NULL,
+  `new_status` enum('present','late','absent') NOT NULL,
+  `changed_by` int(11) NOT NULL,
+  `change_reason` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `attendance_logs`
+--
+
+INSERT INTO `attendance_logs` (`id`, `attendance_id`, `previous_status`, `new_status`, `changed_by`, `change_reason`, `created_at`) VALUES
+(1, 13, 'present', 'late', 1, NULL, '2024-12-12 09:25:36'),
+(2, 13, 'late', 'absent', 1, NULL, '2024-12-12 09:25:37'),
+(3, 13, 'absent', 'present', 1, NULL, '2024-12-12 09:25:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `attendance_settings`
+--
+
+CREATE TABLE `attendance_settings` (
+  `id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `late_threshold_minutes` int(11) NOT NULL DEFAULT 15,
+  `attendance_window_before_minutes` int(11) NOT NULL DEFAULT 15,
+  `attendance_window_after_minutes` int(11) NOT NULL DEFAULT 30,
+  `geofencing_enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `geofencing_radius_meters` int(11) DEFAULT 100,
+  `center_latitude` decimal(10,8) DEFAULT NULL,
+  `center_longitude` decimal(11,8) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -251,9 +314,9 @@ CREATE TABLE `sessions` (
 
 INSERT INTO `sessions` (`id`, `course_id`, `date`, `start_time`, `end_time`, `status`, `created_at`, `updated_at`, `session_name`, `description`, `room`, `session_date`, `created_by`) VALUES
 (20, 11, '2024-12-12', '00:52:00', '12:58:00', 'completed', '2024-12-11 17:52:50', '2024-12-12 08:01:04', 'IDK', 'HI', 'W3', NULL, NULL),
-(23, 11, '2024-12-14', '08:26:00', '11:30:00', 'scheduled', '2024-12-11 18:26:53', '2024-12-11 18:26:53', 'Working?', 'HI', 'W3', NULL, NULL),
-(25, 11, '2024-12-12', '13:30:00', '16:30:00', 'ongoing', '2024-12-12 07:46:43', '2024-12-12 07:46:43', 'Current', '', 'E2', NULL, NULL),
-(26, 11, '2024-12-12', '14:53:00', '16:30:00', 'ongoing', '2024-12-12 07:53:53', '2024-12-12 08:00:54', 'Testing', '', 'W3', NULL, NULL);
+(23, 11, '2024-12-12', '20:26:00', '23:55:00', 'ongoing', '2024-12-11 18:26:53', '2024-12-12 14:52:23', 'Working?', 'HI', 'W3', NULL, NULL),
+(25, 11, '2024-12-12', '13:30:00', '16:30:00', 'completed', '2024-12-12 07:46:43', '2024-12-12 13:34:55', 'Current', '', 'E2', NULL, NULL),
+(26, 11, '2024-12-12', '14:53:00', '16:30:00', 'completed', '2024-12-12 07:53:53', '2024-12-12 13:34:55', 'Testing', '', 'W3', NULL, NULL);
 
 --
 -- Triggers `sessions`
@@ -338,9 +401,25 @@ ALTER TABLE `activities`
 --
 ALTER TABLE `attendance`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `student_id` (`student_id`),
-  ADD KEY `course_id` (`course_id`),
-  ADD KEY `fk_attendance_session` (`session_id`);
+  ADD KEY `marked_by` (`marked_by`),
+  ADD KEY `fk_attendance_student` (`student_id`),
+  ADD KEY `fk_attendance_session` (`session_id`),
+  ADD KEY `fk_attendance_course` (`course_id`);
+
+--
+-- Indexes for table `attendance_logs`
+--
+ALTER TABLE `attendance_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `attendance_id` (`attendance_id`),
+  ADD KEY `changed_by` (`changed_by`);
+
+--
+-- Indexes for table `attendance_settings`
+--
+ALTER TABLE `attendance_settings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `course_id` (`course_id`);
 
 --
 -- Indexes for table `attendance_tokens`
@@ -410,13 +489,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activities`
 --
 ALTER TABLE `activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
 
 --
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `attendance_logs`
+--
+ALTER TABLE `attendance_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `attendance_settings`
+--
+ALTER TABLE `attendance_settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `attendance_tokens`
@@ -470,7 +561,23 @@ ALTER TABLE `activities`
 ALTER TABLE `attendance`
   ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`),
-  ADD CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `fk_attendance_course` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_attendance_marker` FOREIGN KEY (`marked_by`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `attendance_logs`
+--
+ALTER TABLE `attendance_logs`
+  ADD CONSTRAINT `fk_log_attendance` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_log_user` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `attendance_settings`
+--
+ALTER TABLE `attendance_settings`
+  ADD CONSTRAINT `fk_settings_course` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `attendance_tokens`
@@ -512,71 +619,6 @@ ALTER TABLE `sessions`
 ALTER TABLE `student_courses`
   ADD CONSTRAINT `student_courses_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `student_courses_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`);
-
---
--- Table structure for table `attendance_records`
---
-
-CREATE TABLE `attendance_records` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
-  `session_id` int(11) NOT NULL,
-  `status` enum('present','late','absent') NOT NULL,
-  `time_marked` timestamp NOT NULL DEFAULT current_timestamp(),
-  `marked_by` int(11) NOT NULL,
-  `latitude` decimal(10,8) DEFAULT NULL,
-  `longitude` decimal(11,8) DEFAULT NULL,
-  `notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `student_id` (`student_id`),
-  KEY `session_id` (`session_id`),
-  KEY `marked_by` (`marked_by`),
-  CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_attendance_marker` FOREIGN KEY (`marked_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Table structure for table `attendance_settings`
---
-
-CREATE TABLE `attendance_settings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `course_id` int(11) NOT NULL,
-  `late_threshold_minutes` int(11) NOT NULL DEFAULT 15,
-  `attendance_window_before_minutes` int(11) NOT NULL DEFAULT 15,
-  `attendance_window_after_minutes` int(11) NOT NULL DEFAULT 30,
-  `geofencing_enabled` tinyint(1) NOT NULL DEFAULT 0,
-  `geofencing_radius_meters` int(11) DEFAULT 100,
-  `center_latitude` decimal(10,8) DEFAULT NULL,
-  `center_longitude` decimal(11,8) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `course_id` (`course_id`),
-  CONSTRAINT `fk_settings_course` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Table structure for table `attendance_logs`
---
-
-CREATE TABLE `attendance_logs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `attendance_record_id` int(11) NOT NULL,
-  `previous_status` enum('present','late','absent') DEFAULT NULL,
-  `new_status` enum('present','late','absent') NOT NULL,
-  `changed_by` int(11) NOT NULL,
-  `change_reason` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `attendance_record_id` (`attendance_record_id`),
-  KEY `changed_by` (`changed_by`),
-  CONSTRAINT `fk_log_attendance` FOREIGN KEY (`attendance_record_id`) REFERENCES `attendance_records` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_log_user` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DELIMITER $$
 --

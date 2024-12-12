@@ -93,19 +93,15 @@ if (isset($_GET['course_id'])) {
                 <input type="date" name="session_date" id="session_date" class="form-control" required>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="start_time">Start Time</label>
-                        <input type="time" name="start_time" id="start_time" class="form-control" required>
-                    </div>
+            <div class="form-group">
+                <label>Time Slot</label>
+                <div class="time-slot-buttons">
+                    <button type="button" class="btn-time-slot" data-slot="morning">8:30 AM - 11:30 AM</button>
+                    <button type="button" class="btn-time-slot" data-slot="afternoon">1:30 PM - 4:30 PM</button>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="end_time">End Time</label>
-                        <input type="time" name="end_time" id="end_time" class="form-control" required>
-                    </div>
-                </div>
+                <input type="hidden" name="time_slot" id="time_slot" required>
+                <input type="hidden" name="start_time" id="start_time">
+                <input type="hidden" name="end_time" id="end_time">
             </div>
 
             <div class="form-actions">
@@ -117,6 +113,35 @@ if (isset($_GET['course_id'])) {
     </div>
 </div>
 
+<style>
+.time-slot-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.btn-time-slot {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ddd;
+    background: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-time-slot:hover {
+    border-color: #007bff;
+    background: #f8f9fa;
+}
+
+.btn-time-slot.active {
+    background: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Set minimum date to today
@@ -124,22 +149,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     dateInput.min = today;
 
-    // Time validation
+    // Handle time slot selection
+    const timeSlotButtons = document.querySelectorAll('.btn-time-slot');
+    const timeSlotInput = document.getElementById('time_slot');
     const startTimeInput = document.getElementById('start_time');
     const endTimeInput = document.getElementById('end_time');
 
-    function validateTimes() {
-        if (startTimeInput.value && endTimeInput.value) {
-            if (startTimeInput.value >= endTimeInput.value) {
-                endTimeInput.setCustomValidity('End time must be after start time');
-            } else {
-                endTimeInput.setCustomValidity('');
-            }
-        }
-    }
+    timeSlotButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            timeSlotButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const slot = this.dataset.slot;
+            timeSlotInput.value = slot;
 
-    startTimeInput.addEventListener('change', validateTimes);
-    endTimeInput.addEventListener('change', validateTimes);
+            if (slot === 'morning') {
+                startTimeInput.value = '08:30';
+                endTimeInput.value = '11:30';
+            } else if (slot === 'afternoon') {
+                startTimeInput.value = '13:30';
+                endTimeInput.value = '16:30';
+            }
+        });
+    });
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!timeSlotInput.value) {
+            e.preventDefault();
+            alert('Please select a time slot');
+        }
+    });
 });
 </script>
 
