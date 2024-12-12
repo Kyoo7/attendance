@@ -104,7 +104,7 @@ try {
         </div>
         <?php else: ?>
             <?php foreach ($courses as $course): ?>
-            <div class="course-card">
+            <div class="course-card" onclick="location.href='course-details.php?id=<?php echo $course['id']; ?>'">
                 <div class="course-header">
                     <h3><?php echo htmlspecialchars($course['course_name']); ?></h3>
                     <span class="course-code"><?php echo htmlspecialchars($course['course_code']); ?></span>
@@ -151,14 +151,11 @@ try {
                     </div>
                     <span class="progress-text"><?php echo $progress; ?>% Completion</span>
                 </div>
-                <div class="course-actions">
-                    <button class="action-btn edit" onclick="location.href='edit-course.php?id=<?php echo $course['id']; ?>'">
-                        <i class="fas fa-edit"></i> Edit Course
+                <div class="course-actions" onclick="event.stopPropagation();">
+                    <button class="btn-secondary" onclick="location.href='edit-course.php?id=<?php echo $course['id']; ?>'">
+                        <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="action-btn view" onclick="location.href='course-details.php?id=<?php echo $course['id']; ?>'">
-                        <i class="fas fa-eye"></i> View Details
-                    </button>
-                    <button class="action-btn delete" onclick="deleteCourse(<?php echo $course['id']; ?>, '<?php echo htmlspecialchars($course['course_name'], ENT_QUOTES); ?>')">
+                    <button class="btn-danger" onclick="confirmDeleteCourse(<?php echo $course['id']; ?>)">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -205,6 +202,23 @@ try {
 <script>
 function deleteCourse(courseId, courseName) {
     if (confirm(`Are you sure you want to delete the course "${courseName}"? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '../actions/delete-course.php';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'course_id';
+        input.value = courseId;
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function confirmDeleteCourse(courseId) {
+    if (confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '../actions/delete-course.php';

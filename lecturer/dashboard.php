@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/header.php';
 require_once '../config/database.php';
+require_once '../includes/session_update.php';
 
 // Set timezone to Asia/Jakarta
 date_default_timezone_set('Asia/Jakarta');
@@ -17,6 +18,9 @@ $stmt = $conn->prepare("SELECT * FROM courses WHERE lecturer_id = ? AND status =
 $stmt->execute([$lecturer_id]);
 $courses = $stmt->fetchAll();
 
+// Force update all session statuses
+forceUpdateAllSessionStatuses($conn);
+
 // Fetch current session (if any)
 $stmt = $conn->prepare("
     SELECT s.*, c.course_name, c.course_code 
@@ -24,9 +28,10 @@ $stmt = $conn->prepare("
     JOIN courses c ON s.course_id = c.id
     WHERE s.date = ?
     AND s.status = 'ongoing'
+    AND c.lecturer_id = ?
     LIMIT 1
 ");
-$stmt->execute([$currentDate]);
+$stmt->execute([$currentDate, $lecturer_id]);
 $currentSession = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // If no current session, fetch next upcoming session
@@ -36,8 +41,10 @@ if (!$currentSession) {
         FROM sessions s
         JOIN courses c ON s.course_id = c.id
         WHERE c.lecturer_id = ? 
-        AND ((s.date = ? AND s.start_time > ?) 
-             OR s.date > ?)
+        AND (
+            (s.date = ? AND s.start_time > ?) 
+            OR s.date > ?
+        )
         AND s.status = 'scheduled'
         ORDER BY s.date ASC, s.start_time ASC
         LIMIT 1

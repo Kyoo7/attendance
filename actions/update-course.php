@@ -10,11 +10,10 @@ if ($_SESSION['role'] !== 'admin') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $course_id = $_POST['course_id'];
-    $course_code = trim($_POST['course_code']);
-    $course_name = trim($_POST['course_name']);
+    $course_code = filter_var($_POST['course_code'], FILTER_SANITIZE_STRING);
+    $course_name = filter_var($_POST['course_name'], FILTER_SANITIZE_STRING);
     $lecturer_id = $_POST['lecturer_id'];
-    $description = trim($_POST['description']);
-    $total_sessions = $_POST['total_sessions'];
+    $description = !empty($_POST['description']) ? filter_var($_POST['description'], FILTER_SANITIZE_STRING) : null;
     $start_date = $_POST['start_date'];
     $end_date = $_POST['end_date'];
     $status = $_POST['status'];
@@ -41,8 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update course
         $stmt = $conn->prepare("
             UPDATE courses 
-            SET course_code = ?, course_name = ?, lecturer_id = ?, description = ?,
-                total_sessions = ?, start_date = ?, end_date = ?, status = ?, updated_at = NOW()
+            SET course_code = ?, 
+                course_name = ?, 
+                lecturer_id = ?, 
+                description = ?, 
+                total_sessions = ?, 
+                start_date = ?, 
+                end_date = ?, 
+                status = ?, 
+                updated_at = NOW()
             WHERE id = ?
         ");
 
@@ -51,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $course_name,
             $lecturer_id,
             $description,
-            $total_sessions,
+            0, // Default total_sessions to 0
             $start_date,
             $end_date,
             $status,
@@ -64,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($course['course_name'] !== $course_name) $changes[] = "course name";
         if ($course['lecturer_id'] !== $lecturer_id) $changes[] = "lecturer";
         if ($course['description'] !== $description) $changes[] = "description";
-        if ($course['total_sessions'] !== $total_sessions) $changes[] = "total sessions";
         if ($course['start_date'] !== $start_date) $changes[] = "start date";
         if ($course['end_date'] !== $end_date) $changes[] = "end date";
         if ($course['status'] !== $status) $changes[] = "status";

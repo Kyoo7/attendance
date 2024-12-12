@@ -14,7 +14,7 @@ if ($_SESSION['role'] !== 'admin') {
 
 try {
     // Validate required fields
-    $required_fields = ['course_code', 'course_name', 'lecturer_id', 'total_sessions', 'start_date', 'end_date'];
+    $required_fields = ['course_code', 'course_name', 'lecturer_id', 'start_date', 'end_date'];
     foreach ($required_fields as $field) {
         if (empty($_POST[$field])) {
             throw new Exception("All required fields must be filled out.");
@@ -25,7 +25,6 @@ try {
     $course_code = filter_var($_POST['course_code'], FILTER_SANITIZE_STRING);
     $course_name = filter_var($_POST['course_name'], FILTER_SANITIZE_STRING);
     $lecturer_id = filter_var($_POST['lecturer_id'], FILTER_SANITIZE_NUMBER_INT);
-    $total_sessions = filter_var($_POST['total_sessions'], FILTER_SANITIZE_NUMBER_INT);
     $start_date = $_POST['start_date'];
     $end_date = $_POST['end_date'];
     $description = !empty($_POST['description']) ? filter_var($_POST['description'], FILTER_SANITIZE_STRING) : null;
@@ -61,19 +60,30 @@ try {
 
     // Insert course
     $stmt = $conn->prepare("
-        INSERT INTO courses (course_code, course_name, lecturer_id, total_sessions, 
-                           start_date, end_date, description) 
+        INSERT INTO courses (course_code, course_name, lecturer_id, description, 
+                           total_sessions, start_date, end_date) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
+    
+    // Debug the values being sent
+    error_log("Adding course with values: " . print_r([
+        'course_code' => $course_code,
+        'course_name' => $course_name,
+        'lecturer_id' => $lecturer_id,
+        'start_date' => $start_date,
+        'end_date' => $end_date,
+        'description' => $description,
+        'total_sessions' => 0
+    ], true));
     
     $stmt->execute([
         $course_code,
         $course_name,
         $lecturer_id,
-        $total_sessions,
+        $description,
+        0, // Default total_sessions to 0
         $start_date,
-        $end_date,
-        $description
+        $end_date
     ]);
 
     // Commit transaction

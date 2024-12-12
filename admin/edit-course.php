@@ -89,11 +89,6 @@ try {
             </div>
 
             <div class="form-group">
-                <label for="total_sessions">Total Sessions*</label>
-                <input type="number" id="total_sessions" name="total_sessions" value="<?php echo $course['total_sessions']; ?>" required min="1">
-            </div>
-
-            <div class="form-group">
                 <label for="start_date">Start Date*</label>
                 <input type="date" id="start_date" name="start_date" value="<?php echo $course['start_date']; ?>" required>
             </div>
