@@ -1,0 +1,258 @@
+/* Dashboard Layout */
+.dashboard-container {
+    background-color: #F7FAFC;
+    min-height: 100vh;
+}
+
+/* Header Styles */
+.dashboard-header {
+    background: white;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-message {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2D3748;
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-image {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #E2E8F0;
+}
+
+/* Session Card Styles */
+.session-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.session-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #8c0055;
+}
+
+.session-status {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-ongoing {
+    background: #DEF7EC;
+    color: #046C4E;
+}
+
+.status-scheduled {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.session-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.session-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-label {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.info-value {
+    color: #2D3748;
+    font-weight: 500;
+}
+
+/* Attendance Status Styles */
+.attendance-status {
+    margin-right: 1rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-present {
+    background: #DEF7EC;
+    color: #046C4E;
+}
+
+.status-late {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.status-absent {
+    background: #FEE2E2;
+    color: #B91C1C;
+}
+
+.status-pending {
+    background: #E5E7EB;
+    color: #4B5563;
+}
+
+.time-marked {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid currentColor;
+}
+
+/* Attendance Button Styles */
+.attendance-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.attendance-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+}
+
+.attendance-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.attendance-btn.active {
+    border: 2px solid currentColor;
+    font-weight: 600;
+}
+
+.btn-present {
+    background: #8c0055;
+    color: white;
+}
+
+.btn-present.active {
+    background: #DEF7EC;
+    color: #046C4E;
+    border-color: #046C4E;
+}
+
+.btn-late {
+    background: #F59E0B;
+    color: white;
+}
+
+.btn-late.active {
+    background: #FEF3C7;
+    color: #92400E;
+    border-color: #92400E;
+}
+
+.btn-absent {
+    background: #EF4444;
+    color: white;
+}
+
+.btn-absent.active {
+    background: #FEE2E2;
+    color: #B91C1C;
+    border-color: #B91C1C;
+}
+
+/* Student List Styles */
+.student-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.5rem;
+    width: 300px;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #8c0055;
+    box-shadow: 0 0 0 3px rgba(140, 0, 85, 0.1);
+}
+
+.student-card {
+    display: grid;
+    grid-template-columns: 2fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #E2E8F0;
+}
+
+.student-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.student-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    object-fit: cover;
+}
+
+.student-details h3 {
+    font-weight: 600;
+    color: #2D3748;
+    margin: 0;
+}
+
+.student-details .text-meta {
+    color: #718096;
+    font-size: 0.875rem;
+}

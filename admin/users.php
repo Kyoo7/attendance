@@ -142,7 +142,7 @@ try {
                 <tr>
                     <td><?php echo htmlspecialchars($user['id']); ?></td>
                     <td class="profile-cell">
-                        <img src="<?php echo !empty($user['profile_image']) ? '../uploads/profiles/' . $user['profile_image'] : '../assets/images/profile-placeholder.png'; ?>" 
+                        <img src="<?php echo !empty($user['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($user['profile_picture']) : '../assets/images/default-profile.png'; ?>" 
                              alt="Profile" class="profile-img">
                     </td>
                     <td><?php echo htmlspecialchars($user['full_name']); ?></td>

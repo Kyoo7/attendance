@@ -84,6 +84,11 @@ if (!isset($_SESSION['user_id'])) {
                             <i class="fas fa-clipboard-check"></i> Students
                         </a>
                     </div>
+                    <div class="nav-item">
+                        <a href="../lecturer/profile.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : ''; ?>">
+                            <i class="fas fa-clipboard-check"></i> Profile
+                        </a>
+                    </div>
                 <?php else: ?>
                     <div class="nav-item">
                         <a href="../student/dashboard.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'dashboard.php' ? 'active' : ''; ?>">

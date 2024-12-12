@@ -198,8 +198,9 @@
     background: #F8FAFC;
 }
 
+/* Profile Image Styles */
 .profile-cell {
-    width: 50px;
+    padding: 0.5rem !important;
 }
 
 .profile-img {
@@ -207,6 +208,15 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid var(--border-color);
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+}
+
+.profile-img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .badge {

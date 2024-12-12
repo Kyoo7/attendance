@@ -3,12 +3,12 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 11, 2024 at 06:08 PM
+-- Generation Time: Dec 12, 2024 at 10:12 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;  
+START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -90,7 +90,32 @@ INSERT INTO `activities` (`id`, `user_id`, `action_type`, `entity_type`, `entity
 (45, 12, 'update', 'course', 11, 'Management Information System', 'Updated lecturer, total sessions', '2024-12-11 04:10:52'),
 (46, 12, 'update', 'course', 12, 'Please', 'Updated course code, course name, lecturer, total sessions', '2024-12-11 04:18:00'),
 (47, 12, 'update', 'course', 12, 'Please', 'Updated lecturer, total sessions', '2024-12-11 15:19:28'),
-(48, 12, 'update', 'course', 12, 'Please', 'Updated lecturer, total sessions', '2024-12-11 15:28:53');
+(48, 12, 'update', 'course', 12, 'Please', 'Updated lecturer, total sessions', '2024-12-11 15:28:53'),
+(49, 12, 'delete', '', 18, 'IDK', 'Deleted session for course: Management Information System', '2024-12-11 17:28:36'),
+(50, 12, 'delete', '', 14, 'Testing3', 'Deleted session for course: Management Information System', '2024-12-11 17:28:40'),
+(51, 12, 'delete', '', 15, 'Testing', 'Deleted session for course: Management Information System', '2024-12-11 17:28:43'),
+(52, 12, 'delete', '', 11, 'Testing', 'Deleted session for course: Management Information System', '2024-12-11 17:28:46'),
+(53, 12, 'delete', '', 10, 'Testing', 'Deleted session for course: Management Information System', '2024-12-11 17:28:49'),
+(54, 12, 'delete', '', 17, 'Current session', 'Deleted session for course: Management Information System', '2024-12-11 17:28:52'),
+(55, 12, 'delete', '', 16, 'Testing', 'Deleted session for course: Management Information System', '2024-12-11 17:28:56'),
+(56, 12, 'delete', '', 19, 'IDK', 'Deleted session for course: Management Information System', '2024-12-11 17:28:59'),
+(57, 12, 'create', '', 20, 'IDK', '{\"course_id\":11,\"date\":\"2024-12-12\"}', '2024-12-11 17:52:50'),
+(58, 12, 'create', '', 21, 'IDK2', '{\"course_id\":11,\"date\":\"2024-12-11\"}', '2024-12-11 18:03:48'),
+(59, 12, 'create', '', 22, 'IDK', '{\"course_id\":11,\"date\":\"2024-12-12\"}', '2024-12-11 18:11:05'),
+(60, 12, 'create', '', 23, 'Working?', '{\"course_id\":11,\"date\":\"2024-12-14\"}', '2024-12-11 18:26:53'),
+(61, 12, 'create', '', 24, 'IDK3', '{\"course_id\":11,\"date\":\"2024-12-12\"}', '2024-12-11 18:27:17'),
+(62, 12, 'create', '', 25, 'Current', '{\"course_id\":11,\"date\":\"2024-12-12\"}', '2024-12-12 07:46:43'),
+(63, 1, 'create', '', 28, 'Testing', 'Session \'Testing\' created for course ID: 11', '2024-12-12 07:55:17'),
+(64, 1, 'delete', '', 21, 'IDK2', 'Deleted session \'IDK2\' from course \'Management Information System\'', '2024-12-12 07:57:40'),
+(65, 1, 'delete', '', 28, 'Testing', 'Deleted session \'Testing\' from course \'Management Information System\'', '2024-12-12 07:57:48'),
+(66, 1, 'delete', '', 27, 'Testing', 'Deleted session \'Testing\' from course \'Management Information System\'', '2024-12-12 07:57:54'),
+(67, 1, 'update', '', 26, 'Testing', 'Updated session \'Testing\' in course \'Management Information System\'', '2024-12-12 08:00:54'),
+(68, 1, 'update', '', 20, 'IDK', 'Updated session \'IDK\' in course \'Management Information System\'', '2024-12-12 08:01:04'),
+(69, 1, 'update', '', 1, 'Dr. John Smith', 'Updated profile information', '2024-12-12 08:22:02'),
+(70, 1, 'update', '', 1, 'Profile Picture', 'Updated profile picture', '2024-12-12 08:41:48'),
+(71, 1, 'update', '', 1, 'Dr. John Smith', 'Updated profile information', '2024-12-12 08:41:50'),
+(72, 1, 'update', '', 1, 'Dr. John Smith', 'Updated profile information', '2024-12-12 08:41:50'),
+(73, 1, 'update', '', 1, 'Ainee', 'Updated profile information', '2024-12-12 08:53:27');
 
 -- --------------------------------------------------------
 
@@ -225,21 +250,16 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `course_id`, `date`, `start_time`, `end_time`, `status`, `created_at`, `updated_at`, `session_name`, `description`, `room`, `session_date`, `created_by`) VALUES
-(10, 11, '2024-12-05', '13:30:00', '16:30:00', 'scheduled', '2024-12-05 09:04:58', '2024-12-05 09:04:58', 'Testing', '', 'W2', '2024-12-05', 12),
-(11, 11, '2024-12-06', '08:30:00', '11:30:00', 'scheduled', '2024-12-06 02:08:56', '2024-12-06 02:08:56', 'Testing', '', 'W2', '2024-12-06', 12),
-(14, 11, '2024-12-09', '08:30:00', '11:30:00', 'scheduled', '2024-12-08 04:07:36', '2024-12-08 04:07:36', 'Testing3', '', 'W2', '2024-12-09', 12),
-(15, 11, '2024-12-12', '11:27:00', '16:27:00', 'scheduled', '2024-12-08 04:27:10', '2024-12-08 04:54:06', 'Testing', '', 'W3', '2024-12-08', NULL),
-(16, 11, '2024-12-26', '11:28:00', '12:28:00', 'scheduled', '2024-12-08 04:28:34', '2024-12-08 04:28:34', 'Testing', '', 'W3', NULL, NULL),
-(17, 11, '2024-12-08', '11:54:00', '13:55:00', 'scheduled', '2024-12-08 04:55:28', '2024-12-08 04:55:28', 'Current session', '', 'W3', NULL, NULL),
-(18, 11, '2024-12-11', '09:23:00', '23:30:00', 'scheduled', '2024-12-11 02:28:21', '2024-12-11 02:28:21', 'IDK', 'PLS WORK', 'W3', NULL, NULL),
-(19, 11, '2024-12-11', '10:21:00', '22:23:00', 'scheduled', '2024-12-11 03:21:13', '2024-12-11 03:21:13', 'IDK', 'asdadsad', 'W3', NULL, NULL);
+(20, 11, '2024-12-12', '00:52:00', '12:58:00', 'completed', '2024-12-11 17:52:50', '2024-12-12 08:01:04', 'IDK', 'HI', 'W3', NULL, NULL),
+(23, 11, '2024-12-14', '08:26:00', '11:30:00', 'scheduled', '2024-12-11 18:26:53', '2024-12-11 18:26:53', 'Working?', 'HI', 'W3', NULL, NULL),
+(25, 11, '2024-12-12', '13:30:00', '16:30:00', 'ongoing', '2024-12-12 07:46:43', '2024-12-12 07:46:43', 'Current', '', 'E2', NULL, NULL),
+(26, 11, '2024-12-12', '14:53:00', '16:30:00', 'ongoing', '2024-12-12 07:53:53', '2024-12-12 08:00:54', 'Testing', '', 'W3', NULL, NULL);
 
 --
 -- Triggers `sessions`
 --
 DELIMITER $$
-CREATE TRIGGER `update_session_status` BEFORE UPDATE ON `sessions` FOR EACH ROW BEGIN
-    IF NEW.date < CURDATE() THEN
+CREATE TRIGGER `update_session_status` BEFORE UPDATE ON `sessions` FOR EACH ROW IF NEW.date < CURDATE() THEN
         SET NEW.status = 'completed';
     ELSEIF NEW.date = CURDATE() AND NEW.start_time <= CURTIME() AND NEW.end_time >= CURTIME() THEN
         SET NEW.status = 'ongoing';
@@ -247,8 +267,7 @@ CREATE TRIGGER `update_session_status` BEFORE UPDATE ON `sessions` FOR EACH ROW 
         SET NEW.status = 'completed';
     ELSE
         SET NEW.status = 'scheduled';
-    END IF;
-END
+    END IF
 $$
 DELIMITER ;
 
@@ -280,27 +299,28 @@ CREATE TABLE `users` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `student_id` varchar(50) DEFAULT NULL,
   `department` varchar(100) DEFAULT NULL,
-  `status` enum('active','inactive') NOT NULL DEFAULT 'active'
+  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password`, `full_name`, `role`, `created_at`, `updated_at`, `student_id`, `department`, `status`) VALUES
-(1, 'teacher@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Dr. John Smith', 'lecturer', '2024-12-05 03:30:49', '2024-12-05 07:29:40', NULL, NULL, 'active'),
-(2, 'student1@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Alice Johnson', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active'),
-(3, 'student2@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Bob Wilson', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active'),
-(4, 'student3@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carol Martinez', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active'),
-(5, 'student4@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'David Brown', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active'),
-(6, 'student5@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Eva Chen', 'student', '2024-12-05 03:30:49', '2024-12-05 07:29:33', NULL, NULL, 'active'),
-(7, 'student6@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Frank Rodriguez', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active'),
-(8, 'student7@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Grace Kim', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active'),
-(9, 'student8@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Henry Patel', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active'),
-(10, 'student9@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Isabella Silva', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active'),
-(11, 'student10@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Nhim Kimhuy', 'student', '2024-12-05 03:30:49', '2024-12-11 04:06:24', NULL, NULL, 'active'),
-(12, 'admin1@eamu.edu', '$2y$10$7chJQazBEp4oJAQ3uq120ufGJqezmQOxYqm2kDxY2WqCqA4dvmE3e', 'System Administrator', 'admin', '2024-12-05 03:32:50', '2024-12-05 03:32:50', NULL, NULL, 'active'),
-(14, 'hello@eamu.edu', '$2y$10$tRHQNMf/1UCWokBEi2gNpOcCoT95HcbQUeL8opiP8sAmfDSgo8ldi', 'IhatethisASS', 'lecturer', '2024-12-11 15:32:17', '2024-12-11 15:32:17', NULL, 'BIS', 'active');
+INSERT INTO `users` (`id`, `email`, `password`, `full_name`, `role`, `created_at`, `updated_at`, `student_id`, `department`, `status`, `profile_picture`) VALUES
+(1, 'teacher@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Ainee', 'lecturer', '2024-12-05 03:30:49', '2024-12-12 08:53:27', NULL, 'BIS', 'active', '1_1733992908.jpg'),
+(2, 'student1@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Alice Johnson', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
+(3, 'student2@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Bob Wilson', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
+(4, 'student3@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carol Martinez', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
+(5, 'student4@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'David Brown', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
+(6, 'student5@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Eva Chen', 'student', '2024-12-05 03:30:49', '2024-12-05 07:29:33', NULL, NULL, 'active', NULL),
+(7, 'student6@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Frank Rodriguez', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
+(8, 'student7@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Grace Kim', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
+(9, 'student8@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Henry Patel', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
+(10, 'student9@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Isabella Silva', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
+(11, 'student10@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Nhim Kimhuy', 'student', '2024-12-05 03:30:49', '2024-12-11 04:06:24', NULL, NULL, 'active', NULL),
+(12, 'admin1@eamu.edu', '$2y$10$7chJQazBEp4oJAQ3uq120ufGJqezmQOxYqm2kDxY2WqCqA4dvmE3e', 'System Administrator', 'admin', '2024-12-05 03:32:50', '2024-12-05 03:32:50', NULL, NULL, 'active', NULL),
+(14, 'hello@eamu.edu', '$2y$10$tRHQNMf/1UCWokBEi2gNpOcCoT95HcbQUeL8opiP8sAmfDSgo8ldi', 'IhatethisASS', 'lecturer', '2024-12-11 15:32:17', '2024-12-11 15:32:17', NULL, 'BIS', 'active', NULL);
 
 --
 -- Indexes for dumped tables
@@ -390,7 +410,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activities`
 --
 ALTER TABLE `activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT for table `attendance`
@@ -408,7 +428,7 @@ ALTER TABLE `attendance_tokens`
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `enrollments`
@@ -426,7 +446,7 @@ ALTER TABLE `qr_codes`
 -- AUTO_INCREMENT for table `sessions`
 --
 ALTER TABLE `sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -493,11 +513,76 @@ ALTER TABLE `student_courses`
   ADD CONSTRAINT `student_courses_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `student_courses_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`);
 
+--
+-- Table structure for table `attendance_records`
+--
+
+CREATE TABLE `attendance_records` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `session_id` int(11) NOT NULL,
+  `status` enum('present','late','absent') NOT NULL,
+  `time_marked` timestamp NOT NULL DEFAULT current_timestamp(),
+  `marked_by` int(11) NOT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `student_id` (`student_id`),
+  KEY `session_id` (`session_id`),
+  KEY `marked_by` (`marked_by`),
+  CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_attendance_marker` FOREIGN KEY (`marked_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Table structure for table `attendance_settings`
+--
+
+CREATE TABLE `attendance_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `late_threshold_minutes` int(11) NOT NULL DEFAULT 15,
+  `attendance_window_before_minutes` int(11) NOT NULL DEFAULT 15,
+  `attendance_window_after_minutes` int(11) NOT NULL DEFAULT 30,
+  `geofencing_enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `geofencing_radius_meters` int(11) DEFAULT 100,
+  `center_latitude` decimal(10,8) DEFAULT NULL,
+  `center_longitude` decimal(11,8) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `course_id` (`course_id`),
+  CONSTRAINT `fk_settings_course` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Table structure for table `attendance_logs`
+--
+
+CREATE TABLE `attendance_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `attendance_record_id` int(11) NOT NULL,
+  `previous_status` enum('present','late','absent') DEFAULT NULL,
+  `new_status` enum('present','late','absent') NOT NULL,
+  `changed_by` int(11) NOT NULL,
+  `change_reason` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `attendance_record_id` (`attendance_record_id`),
+  KEY `changed_by` (`changed_by`),
+  CONSTRAINT `fk_log_attendance` FOREIGN KEY (`attendance_record_id`) REFERENCES `attendance_records` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_log_user` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DELIMITER $$
 --
 -- Events
 --
-CREATE DEFINER=`root`@`localhost` EVENT `update_session_statuses` ON SCHEDULE EVERY 1 MINUTE STARTS '2024-12-08 11:26:45' ON COMPLETION NOT PRESERVE ENABLE DO UPDATE sessions
+CREATE DEFINER=`root`@`localhost` EVENT `update_session_statuses` ON SCHEDULE EVERY 1 SECOND STARTS '2024-12-08 11:26:45' ON COMPLETION NOT PRESERVE ENABLE DO UPDATE sessions
     SET status = CASE
         WHEN date < CURDATE() THEN 'completed'
         WHEN date = CURDATE() AND start_time <= CURTIME() AND end_time >= CURTIME() THEN 'ongoing'

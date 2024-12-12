@@ -57,11 +57,17 @@ if (!$currentSession) {
 $students = [];
 if ($currentSession) {
     $stmt = $conn->prepare("
-        SELECT u.* FROM users u 
+        SELECT 
+            u.*,
+            a.status as attendance_status,
+            a.time_marked
+        FROM users u 
         JOIN enrollments e ON u.id = e.student_id 
+        LEFT JOIN attendance a ON a.student_id = u.id AND a.session_id = ?
         WHERE e.course_id = ? AND u.role = 'student'
+        ORDER BY u.full_name ASC
     ");
-    $stmt->execute([$currentSession['course_id']]);
+    $stmt->execute([$currentSession['id'], $currentSession['course_id']]);
     $students = $stmt->fetchAll();
 }
 
@@ -76,168 +82,232 @@ $teacher = $stmt->fetch();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard</title>
+    <title>Lecturer Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/lecturer-dashboard.css">
 </head>
 <body>
-    <div class="flex min-h-screen">
-        <!-- Main Content -->
-        <div class="flex-1">
-            <!-- Header -->
-            <header class="p-4 flex justify-between items-center">
-                <h1 class="text-xl">Hello <?php echo htmlspecialchars($teacher['full_name']); ?>, Welcome To Your Class Today!</h1>
-                <div class="flex items-center gap-4">
-                    <button class="p-2">🔔</button>
-                    <div class="flex items-center gap-2 bg-purple-50 p-2 rounded-lg">
-                        <img src="/placeholder.svg?height=40&width=40" alt="Profile" class="w-8 h-8 rounded-full">
-                        <span><?php echo htmlspecialchars($teacher['full_name']); ?></span>
-                    </div>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="flex justify-between items-center">
+                <h1 class="welcome-message">Welcome back, <?php echo htmlspecialchars($teacher['full_name']); ?>!</h1>
+                <div class="profile-section">
+                    <img src="<?php echo !empty($teacher['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($teacher['profile_picture']) : '../assets/images/default-profile.png'; ?>" 
+                         alt="Profile" class="profile-image">
+                    <span class="font-medium"><?php echo htmlspecialchars($teacher['full_name']); ?></span>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <!-- Session Information Card -->
-            <div class="p-6">
-                <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border">
-                    <?php if ($currentSession): ?>
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-2xl font-semibold text-purple-600">Current Session</h2>
-                            <span class="px-4 py-1 bg-green-100 text-green-800 rounded-full text-sm">In Progress</span>
+        <div class="p-6">
+            <!-- Session Card -->
+            <div class="session-card">
+                <?php if ($currentSession): ?>
+                    <div class="session-header">
+                        <h2 class="session-title">Current Session</h2>
+                        <span class="session-status status-ongoing">In Progress</span>
+                    </div>
+                    <div class="session-grid">
+                        <div class="session-info-item">
+                            <span class="info-label">Course</span>
+                            <span class="info-value"><?php echo htmlspecialchars($currentSession['course_name']); ?> (<?php echo htmlspecialchars($currentSession['course_code']); ?>)</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-gray-600">Course</p>
-                                <p class="font-semibold"><?php echo htmlspecialchars($currentSession['course_name']); ?> (<?php echo htmlspecialchars($currentSession['course_code']); ?>)</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Room</p>
-                                <p class="font-semibold"><?php echo htmlspecialchars($currentSession['room']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Time</p>
-                                <p class="font-semibold"><?php echo date('h:i A', strtotime($currentSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($currentSession['end_time'])); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Session Name</p>
-                                <p class="font-semibold"><?php echo htmlspecialchars($currentSession['session_name']); ?></p>
-                            </div>
+                        <div class="session-info-item">
+                            <span class="info-label">Room</span>
+                            <span class="info-value"><?php echo htmlspecialchars($currentSession['room']); ?></span>
                         </div>
-                    <?php elseif (isset($upcomingSession)): ?>
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-2xl font-semibold text-purple-600">Upcoming Session</h2>
-                            <span class="px-4 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Scheduled</span>
+                        <div class="session-info-item">
+                            <span class="info-label">Time</span>
+                            <span class="info-value"><?php echo date('h:i A', strtotime($currentSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($currentSession['end_time'])); ?></span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-gray-600">Course</p>
-                                <p class="font-semibold"><?php echo htmlspecialchars($upcomingSession['course_name']); ?> (<?php echo htmlspecialchars($upcomingSession['course_code']); ?>)</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Room</p>
-                                <p class="font-semibold"><?php echo htmlspecialchars($upcomingSession['room']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Date & Time</p>
-                                <p class="font-semibold">
-                                    <?php echo date('M d, Y', strtotime($upcomingSession['date'])); ?><br>
-                                    <?php echo date('h:i A', strtotime($upcomingSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($upcomingSession['end_time'])); ?>
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Session Name</p>
-                                <p class="font-semibold"><?php echo htmlspecialchars($upcomingSession['session_name']); ?></p>
-                            </div>
+                        <div class="session-info-item">
+                            <span class="info-label">Session Name</span>
+                            <span class="info-value"><?php echo htmlspecialchars($currentSession['session_name']); ?></span>
                         </div>
-                    <?php else: ?>
-                        <div class="text-center py-8">
-                            <h2 class="text-2xl font-semibold text-gray-600">No Sessions Scheduled</h2>
-                            <p class="text-gray-500 mt-2">There are no current or upcoming sessions scheduled.</p>
+                    </div>
+                <?php elseif (isset($upcomingSession)): ?>
+                    <div class="session-header">
+                        <h2 class="session-title">Upcoming Session</h2>
+                        <span class="session-status status-scheduled">Scheduled</span>
+                    </div>
+                    <div class="session-grid">
+                        <div class="session-info-item">
+                            <span class="info-label">Course</span>
+                            <span class="info-value"><?php echo htmlspecialchars($upcomingSession['course_name']); ?> (<?php echo htmlspecialchars($upcomingSession['course_code']); ?>)</span>
                         </div>
-                    <?php endif; ?>
-                </div>
+                        <div class="session-info-item">
+                            <span class="info-label">Room</span>
+                            <span class="info-value"><?php echo htmlspecialchars($upcomingSession['room']); ?></span>
+                        </div>
+                        <div class="session-info-item">
+                            <span class="info-label">Date & Time</span>
+                            <span class="info-value">
+                                <?php echo date('M d, Y', strtotime($upcomingSession['date'])); ?><br>
+                                <?php echo date('h:i A', strtotime($upcomingSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($upcomingSession['end_time'])); ?>
+                            </span>
+                        </div>
+                        <div class="session-info-item">
+                            <span class="info-label">Session Name</span>
+                            <span class="info-value"><?php echo htmlspecialchars($upcomingSession['session_name']); ?></span>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-8">
+                        <h2 class="text-2xl font-semibold text-gray-600">No Sessions Scheduled</h2>
+                        <p class="text-gray-500 mt-2">There are no current or upcoming sessions scheduled.</p>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <!-- Student List Section -->
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-semibold">Student List</h2>
-                    <input type="search" placeholder="Search..." class="border rounded-lg px-4 py-2">
+            <?php if ($currentSession && !empty($students)): ?>
+            <div class="student-list-section">
+                <div class="student-list-header">
+                    <h2 class="text-2xl font-semibold">Attendance List</h2>
+                    <input type="search" placeholder="Search students..." class="search-input">
                 </div>
 
-                <!-- Student Cards -->
-                <div class="space-y-4">
+                <div class="student-list">
                     <?php foreach ($students as $student): ?>
-                    <div class="bg-white rounded-lg p-4 flex justify-between items-center border">
-                        <div class="flex items-center gap-4">
-                            <img src="/placeholder.svg?height=80&width=80" alt="" class="w-16 h-16 rounded-lg">
-                            <div>
-                                <h3 class="font-semibold"><?php echo htmlspecialchars($student['full_name']); ?></h3>
-                                <div class="text-sm text-gray-600">
-                                    <div><?php echo htmlspecialchars($student['student_id']); ?></div>
+                    <div class="student-card" data-student-id="<?php echo $student['id']; ?>">
+                        <div class="student-info">
+                            <img src="<?php echo !empty($student['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($student['profile_picture']) : '../assets/images/default-profile.png'; ?>" 
+                                 alt="Student" class="student-avatar">
+                            <div class="student-details">
+                                <h3><?php echo htmlspecialchars($student['full_name']); ?></h3>
+                                <div class="text-meta">
+                                    <div><?php echo htmlspecialchars($student['student_id'] ?? 'N/A'); ?></div>
                                     <div><?php echo htmlspecialchars($student['email']); ?></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <?php
-                            $attendanceStatuses = ['present', 'late', 'absent'];
-                            foreach ($attendanceStatuses as $status):
-                            ?>
-                            <span class="px-4 py-1 rounded-full text-sm <?php
-                                echo match($status) {
-                                    'present' => 'bg-purple-600 text-white',
-                                    'late' => 'bg-yellow-400 text-black',
-                                    'absent' => 'bg-red-500 text-white',
-                                    default => 'bg-gray-200'
-                                };
-                            ?>">
-                                <?php echo ucfirst($status); ?>
-                            </span>
-                            <?php endforeach; ?>
+                        <div class="attendance-status">
+                            <?php if ($student['attendance_status']): ?>
+                                <span class="status-badge status-<?php echo $student['attendance_status']; ?>">
+                                    <?php echo ucfirst($student['attendance_status']); ?>
+                                    <?php if ($student['time_marked']): ?>
+                                        <span class="time-marked">
+                                            <?php 
+                                                $time = new DateTime($student['time_marked'], new DateTimeZone('UTC'));
+                                                $time->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                                echo $time->format('h:i A'); 
+                                            ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="status-badge status-pending">Pending</span>
+                            <?php endif; ?>
                         </div>
-                        <div>
-                            <span class="px-4 py-1 rounded-full text-sm bg-gray-200">
-                                Pending
-                            </span>
+                        <div class="attendance-buttons">
+                            <button class="attendance-btn btn-present <?php echo $student['attendance_status'] === 'present' ? 'active' : ''; ?>" 
+                                    onclick="markAttendance(<?php echo $student['id']; ?>, 'present')">Present</button>
+                            <button class="attendance-btn btn-late <?php echo $student['attendance_status'] === 'late' ? 'active' : ''; ?>" 
+                                    onclick="markAttendance(<?php echo $student['id']; ?>, 'late')">Late</button>
+                            <button class="attendance-btn btn-absent <?php echo $student['attendance_status'] === 'absent' ? 'active' : ''; ?>" 
+                                    onclick="markAttendance(<?php echo $student['id']; ?>, 'absent')">Absent</button>
                         </div>
                     </div>
                     <?php endforeach; ?>
                 </div>
             </div>
-        </div>
-
-        <!-- Right Sidebar -->
-        <div class="w-80 p-6">
-            <div class="space-y-6">
-                <div>
-                    <div class="text-gray-500"><?php echo date('F'); ?></div>
-                    <div class="text-6xl font-light text-gray-400"><?php echo date('d'); ?></div>
-                    <div class="text-gray-500"><?php echo date('l'); ?></div>
-                </div>
-
-                <div>
-                    <div class="text-gray-500">Current Time</div>
-                    <div class="text-4xl font-light text-gray-400" id="current-time">
-                        <?php echo date('h:i:s A'); ?>
-                    </div>
-                </div>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
 
     <script>
-        // Update time
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            document.getElementById('current-time').textContent = timeString;
+        async function markAttendance(studentId, status) {
+            const sessionId = <?php echo $currentSession ? $currentSession['id'] : 'null'; ?>;
+            if (!sessionId) {
+                alert('No active session found');
+                return;
+            }
+
+            // Show loading state
+            const studentCard = document.querySelector(`[data-student-id="${studentId}"]`);
+            if (studentCard) {
+                const buttons = studentCard.querySelectorAll('.attendance-btn');
+                buttons.forEach(btn => btn.disabled = true);
+            }
+
+            try {
+                const response = await fetch('../api/mark_attendance.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        session_id: sessionId,
+                        status: status
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to mark attendance');
+                }
+
+                if (data.success) {
+                    // Update UI
+                    if (studentCard) {
+                        // Update status badge
+                        const statusBadge = studentCard.querySelector('.attendance-status');
+                        if (statusBadge) {
+                            statusBadge.innerHTML = `
+                                <span class="status-badge status-${status}">
+                                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                                    <span class="time-marked">
+                                        ${data.data.time_marked}
+                                    </span>
+                                </span>
+                            `;
+                        }
+
+                        // Update button states
+                        const buttons = studentCard.querySelectorAll('.attendance-btn');
+                        buttons.forEach(btn => {
+                            btn.disabled = false;
+                            btn.classList.remove('active');
+                            if (btn.classList.contains(`btn-${status}`)) {
+                                btn.classList.add('active');
+                            }
+                        });
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to mark attendance');
+                }
+            } catch (error) {
+                console.error('Error marking attendance:', error);
+                alert(error.message || 'Failed to mark attendance. Please try again.');
+                
+                // Re-enable buttons on error
+                if (studentCard) {
+                    const buttons = studentCard.querySelectorAll('.attendance-btn');
+                    buttons.forEach(btn => btn.disabled = false);
+                }
+            }
         }
-        
-        setInterval(updateTime, 1000);
-        updateTime();
+
+        // Add search functionality
+        document.querySelector('.search-input')?.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.student-card').forEach(card => {
+                const studentName = card.querySelector('h3').textContent.toLowerCase();
+                const studentId = card.querySelector('.text-meta div').textContent.toLowerCase();
+                const studentEmail = card.querySelector('.text-meta div:last-child').textContent.toLowerCase();
+                
+                if (studentName.includes(searchTerm) || 
+                    studentId.includes(searchTerm) || 
+                    studentEmail.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>
