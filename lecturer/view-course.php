@@ -216,7 +216,7 @@ try {
             <div class="invite-link-section">
                 <h3>Invite Link</h3>
                 <div class="invite-link-container">
-                    <input type="text" id="inviteLink" value="<?php echo sprintf('%s/student/join-course.php?code=%s', rtrim(dirname($_SERVER['PHP_SELF'], 2), '/'), $course_id); ?>" readonly>
+                    <input type="text" id="inviteLink" value="<?php echo sprintf('%s/student/join-course.php?code=%s', rtrim((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF'], 2), '/'), $course_id); ?>" readonly>
                     <button onclick="copyInviteLink()" class="btn-secondary">
                         <i class="fas fa-copy"></i> Copy
                     </button>

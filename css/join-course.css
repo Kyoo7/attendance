@@ -1,0 +1,159 @@
+.join-course-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert i {
+    font-size: 1.2em;
+}
+
+.alert.error {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert.success {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.back-to-dashboard {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.redirect-message {
+    text-align: center;
+    color: #6b7280;
+    margin-top: 20px;
+}
+
+.course-preview {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+.course-preview h2 {
+    color: #1f2937;
+    margin: 0 0 20px;
+    text-align: center;
+}
+
+.course-details {
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.course-details h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.5em;
+}
+
+.course-code {
+    display: inline-block;
+    background: #3b82f6;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin: 10px 0;
+}
+
+.course-info {
+    margin: 20px 0;
+}
+
+.course-info p {
+    margin: 10px 0;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.course-info i {
+    color: #3b82f6;
+    width: 20px;
+}
+
+.join-form {
+    margin-top: 30px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #4b5563;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+    .join-course-container {
+        margin: 20px auto;
+        padding: 10px;
+    }
+
+    .course-preview {
+        padding: 20px;
+    }
+
+    .course-details {
+        padding: 15px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}

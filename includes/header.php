@@ -105,6 +105,11 @@ if (!isset($_SESSION['user_id'])) {
                             <i class="fas fa-clipboard-check"></i> My Attendance
                         </a>
                     </div>
+                    <div class="nav-item">
+                        <a href="../student/attendance.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'attendance.php' ? 'active' : ''; ?>">
+                            <i class="fas fa-clipboard-check"></i> Profile
+                        </a>
+                    </div>
                 <?php endif; ?>
                 
                 <div class="nav-item">
