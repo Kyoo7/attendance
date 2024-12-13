@@ -69,6 +69,35 @@ try {
     $attendance_stats = ['present_count' => 0, 'absent_count' => 0, 'late_count' => 0];
 }
 
+// Calculate attendance percentage based on absences
+$sql = "SELECT 
+    COUNT(*) as total_sessions,
+    COUNT(CASE WHEN a.status = 'absent' THEN 1 END) as absent_count
+FROM sessions s
+LEFT JOIN attendance a ON s.id = a.session_id AND a.student_id = ?
+WHERE s.course_id = ? AND s.date <= CURRENT_DATE";
+
+try {
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$_SESSION['user_id'], $course_id]);
+    $attendance_data = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $total_sessions = $attendance_data['total_sessions'];
+    $absent_count = $attendance_data['absent_count'];
+    
+    // Calculate percentage (start at 100% and subtract for each absence)
+    $attendance_percentage = $total_sessions > 0 ? 
+        max(0, 100 - (($absent_count / $total_sessions) * 100)) : 100;
+    
+    // Round to 1 decimal place
+    $attendance_percentage = round($attendance_percentage, 1);
+} catch (PDOException $e) {
+    error_log("Error calculating attendance percentage: " . $e->getMessage());
+    $attendance_percentage = 0;
+    $total_sessions = 0;
+    $absent_count = 0;
+}
+
 // Fetch all sessions for this course
 $sql = "SELECT s.*, 
         COALESCE(a.status, 'Not marked') as attendance_status,
@@ -87,10 +116,6 @@ try {
     $sessions = [];
 }
 
-// Calculate attendance percentage
-$attendance_percentage = $course['total_sessions'] > 0 
-    ? round(($course['attended_sessions'] / $course['total_sessions']) * 100, 1)
-    : 0;
 ?>
 
 <link rel="stylesheet" href="../css/view-course.css">
@@ -139,9 +164,25 @@ $attendance_percentage = $course['total_sessions'] > 0
         <h2>Attendance Progress</h2>
         <div class="progress-container">
             <div class="progress-bar">
-                <div class="progress" style="width: <?php echo $attendance_percentage; ?>%"></div>
+                <div class="progress <?php echo $attendance_percentage < 90 ? 'warning' : ''; ?>" 
+                     style="width: <?php echo $attendance_percentage; ?>%">
+                </div>
             </div>
-            <span class="percentage"><?php echo $attendance_percentage; ?>%</span>
+            <div class="progress-details">
+                <span class="percentage <?php echo $attendance_percentage < 90 ? 'warning' : ''; ?>">
+                    <?php echo $attendance_percentage; ?>%
+                </span>
+                <?php if ($attendance_percentage < 90): ?>
+                    <span class="warning-text">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Warning: Your attendance is below 90%
+                    </span>
+                <?php endif; ?>
+                <div class="attendance-summary">
+                    <span>Total Sessions: <?php echo $total_sessions; ?></span>
+                    <span>Absences: <?php echo $absent_count; ?></span>
+                </div>
+            </div>
         </div>
     </div>
 

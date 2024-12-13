@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 12, 2024 at 04:09 PM
+-- Generation Time: Dec 13, 2024 at 03:08 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -116,7 +116,8 @@ INSERT INTO `activities` (`id`, `user_id`, `action_type`, `entity_type`, `entity
 (71, 1, 'update', '', 1, 'Dr. John Smith', 'Updated profile information', '2024-12-12 08:41:50'),
 (72, 1, 'update', '', 1, 'Dr. John Smith', 'Updated profile information', '2024-12-12 08:41:50'),
 (73, 1, 'update', '', 1, 'Ainee', 'Updated profile information', '2024-12-12 08:53:27'),
-(74, 1, 'update', '', 23, 'Working?', 'Updated session \'Working?\' in course \'Management Information System\'', '2024-12-12 14:52:23');
+(74, 1, 'update', '', 23, 'Working?', 'Updated session \'Working?\' in course \'Management Information System\'', '2024-12-12 14:52:23'),
+(75, 1, 'create', '', 29, 'Testing', 'Session \'Testing\' created for course ID: 11', '2024-12-13 02:05:30');
 
 -- --------------------------------------------------------
 
@@ -150,7 +151,8 @@ INSERT INTO `attendance` (`id`, `student_id`, `course_id`, `attendance_date`, `s
 (14, 2, 11, NULL, 'present', 1, '2024-12-12 14:54:33', NULL, NULL, NULL, NULL, '2024-12-12 14:52:28', '2024-12-12 14:54:33', 23),
 (15, 3, 11, NULL, 'present', 1, '2024-12-12 14:54:34', NULL, NULL, NULL, NULL, '2024-12-12 14:52:32', '2024-12-12 14:54:34', 23),
 (16, 4, 11, NULL, 'late', 1, '2024-12-12 14:54:36', NULL, NULL, NULL, NULL, '2024-12-12 14:52:33', '2024-12-12 14:54:36', 23),
-(17, 5, 11, NULL, 'absent', 1, '2024-12-12 14:54:37', NULL, NULL, NULL, NULL, '2024-12-12 14:52:34', '2024-12-12 14:54:37', 23);
+(17, 5, 11, NULL, 'absent', 1, '2024-12-12 15:33:02', NULL, NULL, NULL, NULL, '2024-12-12 14:52:34', '2024-12-12 15:33:02', 23),
+(18, 15, 11, NULL, 'present', 1, '2024-12-13 02:06:38', NULL, NULL, NULL, NULL, '2024-12-13 02:06:38', '2024-12-13 02:06:38', 29);
 
 -- --------------------------------------------------------
 
@@ -175,7 +177,10 @@ CREATE TABLE `attendance_logs` (
 INSERT INTO `attendance_logs` (`id`, `attendance_id`, `previous_status`, `new_status`, `changed_by`, `change_reason`, `created_at`) VALUES
 (1, 13, 'present', 'late', 1, NULL, '2024-12-12 09:25:36'),
 (2, 13, 'late', 'absent', 1, NULL, '2024-12-12 09:25:37'),
-(3, 13, 'absent', 'present', 1, NULL, '2024-12-12 09:25:38');
+(3, 13, 'absent', 'present', 1, NULL, '2024-12-12 09:25:38'),
+(4, 17, 'absent', 'late', 1, NULL, '2024-12-12 15:33:01'),
+(5, 17, 'late', 'present', 1, NULL, '2024-12-12 15:33:01'),
+(6, 17, 'present', 'absent', 1, NULL, '2024-12-12 15:33:02');
 
 -- --------------------------------------------------------
 
@@ -268,7 +273,9 @@ INSERT INTO `enrollments` (`id`, `course_id`, `student_id`, `enrollment_date`, `
 (1, 11, 2, '2024-12-05 08:48:11', 'active'),
 (2, 11, 3, '2024-12-05 08:48:11', 'active'),
 (3, 11, 4, '2024-12-05 08:48:11', 'active'),
-(4, 11, 5, '2024-12-05 08:48:11', 'active');
+(4, 11, 5, '2024-12-05 08:48:11', 'active'),
+(5, 12, 15, '2024-12-12 15:49:50', 'active'),
+(6, 11, 15, '2024-12-13 02:06:00', 'active');
 
 -- --------------------------------------------------------
 
@@ -314,9 +321,10 @@ CREATE TABLE `sessions` (
 
 INSERT INTO `sessions` (`id`, `course_id`, `date`, `start_time`, `end_time`, `status`, `created_at`, `updated_at`, `session_name`, `description`, `room`, `session_date`, `created_by`) VALUES
 (20, 11, '2024-12-12', '00:52:00', '12:58:00', 'completed', '2024-12-11 17:52:50', '2024-12-12 08:01:04', 'IDK', 'HI', 'W3', NULL, NULL),
-(23, 11, '2024-12-12', '20:26:00', '23:55:00', 'ongoing', '2024-12-11 18:26:53', '2024-12-12 14:52:23', 'Working?', 'HI', 'W3', NULL, NULL),
+(23, 11, '2024-12-12', '20:26:00', '23:55:00', 'completed', '2024-12-11 18:26:53', '2024-12-13 02:04:40', 'Working?', 'HI', 'W3', NULL, NULL),
 (25, 11, '2024-12-12', '13:30:00', '16:30:00', 'completed', '2024-12-12 07:46:43', '2024-12-12 13:34:55', 'Current', '', 'E2', NULL, NULL),
-(26, 11, '2024-12-12', '14:53:00', '16:30:00', 'completed', '2024-12-12 07:53:53', '2024-12-12 13:34:55', 'Testing', '', 'W3', NULL, NULL);
+(26, 11, '2024-12-12', '14:53:00', '16:30:00', 'completed', '2024-12-12 07:53:53', '2024-12-12 13:34:55', 'Testing', '', 'W3', NULL, NULL),
+(29, 11, '2024-12-13', '08:30:00', '11:30:00', 'ongoing', '2024-12-13 02:05:30', '2024-12-13 02:05:32', 'Testing', '', 'E2', NULL, NULL);
 
 --
 -- Triggers `sessions`
@@ -383,7 +391,8 @@ INSERT INTO `users` (`id`, `email`, `password`, `full_name`, `role`, `created_at
 (10, 'student9@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Isabella Silva', 'student', '2024-12-05 03:30:49', '2024-12-05 03:30:49', NULL, NULL, 'active', NULL),
 (11, 'student10@eamu.edu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Nhim Kimhuy', 'student', '2024-12-05 03:30:49', '2024-12-11 04:06:24', NULL, NULL, 'active', NULL),
 (12, 'admin1@eamu.edu', '$2y$10$7chJQazBEp4oJAQ3uq120ufGJqezmQOxYqm2kDxY2WqCqA4dvmE3e', 'System Administrator', 'admin', '2024-12-05 03:32:50', '2024-12-05 03:32:50', NULL, NULL, 'active', NULL),
-(14, 'hello@eamu.edu', '$2y$10$tRHQNMf/1UCWokBEi2gNpOcCoT95HcbQUeL8opiP8sAmfDSgo8ldi', 'IhatethisASS', 'lecturer', '2024-12-11 15:32:17', '2024-12-11 15:32:17', NULL, 'BIS', 'active', NULL);
+(14, 'hello@eamu.edu', '$2y$10$tRHQNMf/1UCWokBEi2gNpOcCoT95HcbQUeL8opiP8sAmfDSgo8ldi', 'IhatethisASS', 'lecturer', '2024-12-11 15:32:17', '2024-12-11 15:32:17', NULL, 'BIS', 'active', NULL),
+(15, 'student@gmail.com', '$2y$10$hhJ6c/sNxCSheMsALmvrTOM.n4wG8wJz67Dhz8JTHjSVGBl2rkh/e', 'Student', 'student', '2024-12-12 15:37:03', '2024-12-12 15:37:03', '2303045X', NULL, 'active', NULL);
 
 --
 -- Indexes for dumped tables
@@ -489,19 +498,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activities`
 --
 ALTER TABLE `activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `attendance_logs`
 --
 ALTER TABLE `attendance_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `attendance_settings`
@@ -525,7 +534,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `enrollments`
 --
 ALTER TABLE `enrollments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `qr_codes`
@@ -537,13 +546,13 @@ ALTER TABLE `qr_codes`
 -- AUTO_INCREMENT for table `sessions`
 --
 ALTER TABLE `sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Constraints for dumped tables

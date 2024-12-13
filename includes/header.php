@@ -28,6 +28,7 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../css/admin-courses.css">
     <link rel="stylesheet" href="../css/admin-activities.css">
     <link rel="stylesheet" href="../css/modern.css">
+    <link rel="stylesheet" href="../css/student-dashboard.css">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -96,17 +97,7 @@ if (!isset($_SESSION['user_id'])) {
                         </a>
                     </div>
                     <div class="nav-item">
-                        <a href="../student/courses.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'courses.php' ? 'active' : ''; ?>">
-                            <i class="fas fa-book"></i> My Courses
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="../student/attendance.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'attendance.php' ? 'active' : ''; ?>">
-                            <i class="fas fa-clipboard-check"></i> My Attendance
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="../student/attendance.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'attendance.php' ? 'active' : ''; ?>">
+                        <a href="../student/profile.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : ''; ?>">
                             <i class="fas fa-clipboard-check"></i> Profile
                         </a>
                     </div>
