@@ -53,7 +53,7 @@ try {
 
     // Fetch students not already enrolled in this course
     $unenrolledStmt = $conn->prepare("
-        SELECT u.id, u.full_name, u.email 
+        SELECT u.id, u.full_name, u.email, u.student_id 
         FROM users u 
         WHERE u.role = 'student' 
         AND u.id NOT IN (
@@ -67,7 +67,7 @@ try {
 
     // Fetch currently enrolled students
     $enrolledStmt = $conn->prepare("
-        SELECT u.id, u.full_name, u.email 
+        SELECT u.id, u.full_name, u.email, u.student_id, u.profile_picture 
         FROM users u 
         JOIN enrollments e ON u.id = e.student_id 
         WHERE e.course_id = ?
@@ -111,196 +111,208 @@ try {
 }
 ?>
 
-<div class="content-wrapper">
-    <div class="page-header">
-        <h2>Course Details</h2>
-        <div class="header-actions">
-            <a href="courses.php" class="btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Courses
-            </a>
-        </div>
-    </div>
+<link rel="stylesheet" href="../css/admin-course-details.css">
 
-    <?php if(isset($_SESSION['message'])): ?>
-        <div class="alert <?php echo $_SESSION['message_type']; ?>">
-            <?php 
-                echo $_SESSION['message'];
-                unset($_SESSION['message']);
-                unset($_SESSION['message_type']);
-            ?>
-        </div>
-    <?php endif; ?>
-
-    <div class="course-details-container">
-        <div class="course-info-card">
-            <div class="course-header">
-                <h3><?php echo htmlspecialchars($course['course_name']); ?></h3>
-                <span class="course-code"><?php echo htmlspecialchars($course['course_code']); ?></span>
-            </div>
-
-            <div class="course-details-grid">
-                <div class="detail-item">
-                    <label>Lecturer</label>
-                    <span><?php echo htmlspecialchars($course['lecturer_name'] ?? 'Not Assigned'); ?></span>
-                </div>
-
-                <div class="detail-item">
-                    <label>Enrolled Students</label>
-                    <span><?php echo $course['enrolled_students'] ?? 0; ?></span>
-                </div>
-
-                <div class="detail-item">
-                    <label>Course Status</label>
-                    <span><?php echo htmlspecialchars(ucfirst($course['status'] ?? 'Unknown')); ?></span>
-                </div>
-
-                <div class="detail-item full-width">
-                    <label>Course Description</label>
-                    <p><?php echo htmlspecialchars($course['description'] ?? 'No description available'); ?></p>
-                </div>
-
-                <div class="detail-item">
-                    <label>Start Date</label>
-                    <span><?php echo date('d M Y', strtotime($course['start_date'])); ?></span>
-                </div>
-
-                <div class="detail-item">
-                    <label>End Date</label>
-                    <span><?php echo date('d M Y', strtotime($course['end_date'])); ?></span>
-                </div>
-
-                <div class="detail-item">
-                    <label>Total Sessions</label>
-                    <span><?php echo $course['total_sessions'] ?? 0; ?></span>
-                </div>
-
-                <div class="detail-item">
-                    <label>Completed Sessions</label>
-                    <span><?php echo $course['completed_sessions'] ?? 0; ?></span>
-                </div>
-
-                <div class="detail-item">
-                    <label>Total Attendance</label>
-                    <span><?php echo $course['total_attendance'] ?? 0; ?></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="students-section">
-            <div class="section-header">
-                <h4>Course Students</h4>
-                <button class="btn-primary" data-toggle="modal" data-target="#addStudentModal">
-                    <i class="fas fa-plus"></i> Add Student
-                </button>
-            </div>
-
-            <div class="enrolled-students">
-                <h5>Enrolled Students (<?php echo count($enrolledStudents); ?>)</h5>
-                <?php if (empty($enrolledStudents)): ?>
-                    <p>No students enrolled in this course.</p>
-                <?php else: ?>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($enrolledStudents as $student): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($student['full_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($student['email']); ?></td>
-                                    <td>
-                                        <form action="../actions/remove-student.php" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this student from the course?');">
-                                            <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
-                                            <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
-                                            <button type="submit" class="btn-delete btn-sm">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="sessions-section">
-            <div class="section-header">
-                <h4>Course Sessions</h4>
-                <a href="../admin/add-session.php?course_id=<?php echo $course_id; ?>" class="btn-primary">
-                    <i class="fas fa-plus"></i> Add New Session
+<div class="dashboard-container">
+    <div class="content-wrapper">
+        <div class="page-header">
+            <h2>Course Details</h2>
+            <div class="header-actions">
+                <a href="courses.php" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Courses
                 </a>
             </div>
+        </div>
 
-            <?php if (empty($sessions)): ?>
-                <div class="no-sessions-message">
-                    <p>No sessions have been created for this course yet.</p>
+        <?php if(isset($_SESSION['message'])): ?>
+            <div class="alert <?php echo $_SESSION['message_type']; ?>">
+                <?php 
+                    echo $_SESSION['message'];
+                    unset($_SESSION['message']);
+                    unset($_SESSION['message_type']);
+                ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="course-details-container">
+            <div class="course-info-card">
+                <div class="course-header">
+                    <h3><?php echo htmlspecialchars($course['course_name']); ?></h3>
+                    <span class="course-code"><?php echo htmlspecialchars($course['course_code']); ?></span>
                 </div>
-            <?php else: ?>
-                <div class="sessions-list">
-                    <?php foreach ($sessions as $session): ?>
-                        <div class="session-card">
-                            <div class="session-header">
-                                <h5><?php echo htmlspecialchars($session['session_name']); ?></h5>
+
+                <div class="course-details-grid">
+                    <div class="detail-item">
+                        <label>Lecturer</label>
+                        <span><?php echo htmlspecialchars($course['lecturer_name'] ?? 'Not Assigned'); ?></span>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Enrolled Students</label>
+                        <span><?php echo $course['enrolled_students'] ?? 0; ?></span>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Course Status</label>
+                        <span><?php echo htmlspecialchars(ucfirst($course['status'] ?? 'Unknown')); ?></span>
+                    </div>
+
+                    <div class="detail-item full-width">
+                        <label>Course Description</label>
+                        <p><?php echo htmlspecialchars($course['description'] ?? 'No description available'); ?></p>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Start Date</label>
+                        <span><?php echo date('d M Y', strtotime($course['start_date'])); ?></span>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>End Date</label>
+                        <span><?php echo date('d M Y', strtotime($course['end_date'])); ?></span>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Total Sessions</label>
+                        <span><?php echo $course['total_sessions'] ?? 0; ?></span>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Completed Sessions</label>
+                        <span><?php echo $course['completed_sessions'] ?? 0; ?></span>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Total Attendance</label>
+                        <span><?php echo $course['total_attendance'] ?? 0; ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="students-section">
+                <div class="section-header">
+                    <h4>Course Students</h4>
+                    <button class="btn-primary" data-toggle="modal" data-target="#addStudentModal">
+                        <i class="fas fa-plus"></i> Add Student
+                    </button>
+                </div>
+
+                <div class="enrolled-students">
+                    <h5>Enrolled Students (<?php echo count($enrolledStudents); ?>)</h5>
+                    <?php if (empty($enrolledStudents)): ?>
+                        <p>No students enrolled in this course.</p>
+                    <?php else: ?>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Profile</th>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($enrolledStudents as $student): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="student-profile">
+                                                <img src="<?php echo !empty($student['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($student['profile_picture']) : '../assets/images/default-profile.png'; ?>" 
+                                                     alt="Profile" class="profile-image">
+                                            </div>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($student['student_id']); ?></td>
+                                        <td><?php echo htmlspecialchars($student['full_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($student['email']); ?></td>
+                                        <td>
+                                            <form action="../actions/remove-student.php" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this student from the course?');">
+                                                <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
+                                                <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
+                                                <button type="submit" class="btn-delete btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="sessions-section">
+                <div class="section-header">
+                    <h4>Course Sessions</h4>
+                    <a href="../admin/add-session.php?course_id=<?php echo $course_id; ?>" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add New Session
+                    </a>
+                </div>
+
+                <?php if (empty($sessions)): ?>
+                    <div class="no-sessions-message">
+                        <p>No sessions have been created for this course yet.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="sessions-list">
+                        <?php foreach ($sessions as $session): ?>
+                            <div class="session-card" onclick="showSessionAttendance(<?php echo $session['id']; ?>)">
+                                <div class="session-header">
+                                    <h2><?php echo htmlspecialchars($session['session_name']); ?></h2>
+                                </div>
+                                <div class="session-details">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Date:</span>
+                                        <span><?php echo date('d M Y', strtotime($session['session_date'])); ?></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Time:</span>
+                                        <span>
+                                            <?php 
+                                            echo date('H:i', strtotime($session['start_time'])) . 
+                                                 ' - ' . 
+                                                 date('H:i', strtotime($session['end_time'])); 
+                                            ?>
+                                        </span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Room:</span>
+                                        <span><?php echo htmlspecialchars($session['room']); ?></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Attendance:</span>
+                                        <span><?php echo $session['attendance_count']; ?> students</span>
+                                    </div>
+                                    <?php if (!empty($session['description'])): ?>
+                                        <div class="detail-row full-width">
+                                            <span class="detail-label">Description:</span>
+                                            <p><?php echo htmlspecialchars($session['description']); ?></p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                                 <div class="session-actions">
-                                    <a href="../admin/edit-session.php?id=<?php echo $session['id']; ?>&course_id=<?php echo $course_id; ?>" class="btn-edit">
+                                    <a href="../admin/edit-session.php?id=<?php echo $session['id']; ?>&course_id=<?php echo $course_id; ?>" class="btn-edit" onclick="event.stopPropagation();">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="../actions/delete-session.php" method="POST" class="d-inline" onsubmit="return confirmDelete()">
+                                    <form action="../actions/delete-session.php" method="POST" class="d-inline" onsubmit="return confirmDelete(event)">
                                         <input type="hidden" name="session_id" value="<?php echo $session['id']; ?>">
-                                        <button type="submit" class="btn-delete">
+                                        <button type="submit" class="btn-delete" onclick="event.stopPropagation();">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
                             </div>
-
-                            <div class="session-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Date:</span>
-                                    <span><?php echo date('d M Y', strtotime($session['session_date'])); ?></span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Time:</span>
-                                    <span>
-                                        <?php 
-                                        echo date('H:i', strtotime($session['start_time'])) . 
-                                             ' - ' . 
-                                             date('H:i', strtotime($session['end_time'])); 
-                                        ?>
-                                    </span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Room:</span>
-                                    <span><?php echo htmlspecialchars($session['room']); ?></span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Attendance:</span>
-                                    <span><?php echo $session['attendance_count']; ?> students</span>
-                                </div>
-                                <?php if (!empty($session['description'])): ?>
-                                    <div class="detail-row full-width">
-                                        <span class="detail-label">Description:</span>
-                                        <p><?php echo htmlspecialchars($session['description']); ?></p>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Add Student Modal -->
-<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel" style="z-index: 1060 !important;">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" style="z-index: 1070 !important;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="addStudentModalLabel">Add Students to Course</h5>
@@ -311,19 +323,58 @@ try {
             <div class="modal-body">
                 <form action="../actions/add-students-to-course.php" method="POST" id="addStudentsForm">
                     <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
-                    <div class="form-group">
-                        <label for="studentSelect">Select Students</label>
-                        <select multiple class="form-control" id="studentSelect" name="student_ids[]" required>
-                            <?php foreach ($unenrolledStudents as $student): ?>
-                                <option value="<?php echo $student['id']; ?>">
-                                    <?php echo htmlspecialchars($student['full_name'] . ' (' . $student['email'] . ')'); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                    
+                    <!-- Search Filters -->
+                    <div class="search-filters mb-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" id="studentIdFilter" class="form-control" placeholder="Search by Student ID">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="nameFilter" class="form-control" placeholder="Search by Name">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="emailFilter" class="form-control" placeholder="Search by Email">
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Students Table -->
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover" id="studentsTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="selectAll" title="Select All">
+                                    </th>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($unenrolledStudents as $student): ?>
+                                    <tr class="student-row">
+                                        <td>
+                                            <input type="checkbox" name="student_ids[]" value="<?php echo $student['id']; ?>" class="student-checkbox">
+                                        </td>
+                                        <td class="student-id"><?php echo htmlspecialchars($student['student_id']); ?></td>
+                                        <td class="student-name"><?php echo htmlspecialchars($student['full_name']); ?></td>
+                                        <td class="student-email"><?php echo htmlspecialchars($student['email']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Selected Count -->
+                    <div class="mt-3">
+                        <span id="selectedCount" class="text-muted">0 students selected</span>
+                    </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Add Students</button>
+                        <button type="submit" class="btn btn-primary" id="addSelectedBtn" disabled>Add Selected Students</button>
                     </div>
                 </form>
             </div>
@@ -331,15 +382,177 @@ try {
     </div>
 </div>
 
+<!-- Session Attendance Modal -->
+<div id="sessionAttendanceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Session Attendance</h3>
+            <span class="close" onclick="closeAttendanceModal()">&times;</span>
+        </div>
+        <div id="sessionInfo"></div>
+        <div id="attendanceList"></div>
+    </div>
+</div>
+
 <script>
-function confirmDelete() {
-    return confirm('Are you sure you want to delete this session? This action cannot be undone.');
+function confirmDelete(event) {
+    event.stopPropagation();
+    return confirm('Are you sure you want to delete this session?');
 }
 
-$(document).ready(function() {
-    $('#studentSelect').select2({
-        placeholder: "Select students to add",
-        allowClear: true
+function closeAttendanceModal() {
+    document.getElementById('sessionAttendanceModal').style.display = 'none';
+}
+
+async function showSessionAttendance(sessionId) {
+    const modal = document.getElementById('sessionAttendanceModal');
+    const sessionInfo = document.getElementById('sessionInfo');
+    const attendanceList = document.getElementById('attendanceList');
+    
+    modal.style.display = 'block';
+    sessionInfo.innerHTML = '';
+    attendanceList.innerHTML = '<div class="loading">Loading attendance data...</div>';
+    
+    try {
+        const response = await fetch(`../api/admin_get_session_attendance.php?session_id=${sessionId}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.message || 'Failed to load attendance data');
+        }
+        
+        // Update session info
+        sessionInfo.innerHTML = `
+            <div class="session-header">
+                <h4>${data.session.session_name}</h4>
+                <span class="status ${data.session.status}">${data.session.status}</span>
+            </div>
+            <div class="session-details">
+                <p>Date: ${data.session.date}</p>
+                <p>Time: ${data.session.start_time} - ${data.session.end_time}</p>
+                <p>Room: ${data.session.room || 'Not specified'}</p>
+            </div>
+        `;
+        
+        // Create attendance table
+        let tableHtml = `
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        data.attendance.forEach(record => {
+            const statusClass = record.status.toLowerCase();
+            tableHtml += `
+                <tr>
+                    <td>${record.name}</td>
+                    <td>${record.email}</td>
+                    <td><span class="status-badge ${statusClass}">${record.status}</span></td>
+                    <td>${record.attendance_time || '-'}</td>
+                </tr>
+            `;
+        });
+        
+        tableHtml += '</tbody></table>';
+        attendanceList.innerHTML = tableHtml;
+        
+    } catch (error) {
+        console.error('Error loading attendance:', error);
+        attendanceList.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Error: ${error.message}</p>
+                <button onclick="closeAttendanceModal()" class="btn-secondary">Close</button>
+            </div>
+        `;
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('sessionAttendanceModal');
+    if (event.target === modal) {
+        closeAttendanceModal();
+    }
+}
+
+document.querySelector('.close').onclick = function() {
+    document.getElementById('sessionAttendanceModal').style.display = 'none';
+}
+
+// Add Student Modal Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const studentIdFilter = document.getElementById('studentIdFilter');
+    const nameFilter = document.getElementById('nameFilter');
+    const emailFilter = document.getElementById('emailFilter');
+    const selectAll = document.getElementById('selectAll');
+    const studentRows = document.querySelectorAll('.student-row');
+    const selectedCount = document.getElementById('selectedCount');
+    const addSelectedBtn = document.getElementById('addSelectedBtn');
+
+    // Filter function
+    function filterStudents() {
+        const idValue = studentIdFilter.value.toLowerCase();
+        const nameValue = nameFilter.value.toLowerCase();
+        const emailValue = emailFilter.value.toLowerCase();
+
+        studentRows.forEach(row => {
+            const studentId = row.querySelector('.student-id').textContent.toLowerCase();
+            const name = row.querySelector('.student-name').textContent.toLowerCase();
+            const email = row.querySelector('.student-email').textContent.toLowerCase();
+
+            const matchesFilter = 
+                studentId.includes(idValue) &&
+                name.includes(nameValue) &&
+                email.includes(emailValue);
+
+            row.style.display = matchesFilter ? '' : 'none';
+        });
+    }
+
+    // Update selected count and button state
+    function updateSelectedCount() {
+        const checkedBoxes = document.querySelectorAll('.student-checkbox:checked');
+        const count = checkedBoxes.length;
+        selectedCount.textContent = `${count} student${count !== 1 ? 's' : ''} selected`;
+        addSelectedBtn.disabled = count === 0;
+    }
+
+    // Event listeners for filters
+    studentIdFilter.addEventListener('input', filterStudents);
+    nameFilter.addEventListener('input', filterStudents);
+    emailFilter.addEventListener('input', filterStudents);
+
+    // Select all functionality
+    selectAll.addEventListener('change', function() {
+        const visibleCheckboxes = document.querySelectorAll('.student-row:not([style*="display: none"]) .student-checkbox');
+        visibleCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateSelectedCount();
+    });
+
+    // Individual checkbox change
+    document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
+    });
+
+    // Clear filters when modal is hidden
+    $('#addStudentModal').on('hidden.bs.modal', function () {
+        studentIdFilter.value = '';
+        nameFilter.value = '';
+        emailFilter.value = '';
+        filterStudents();
+        selectAll.checked = false;
+        document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = false);
+        updateSelectedCount();
     });
 });
 </script>

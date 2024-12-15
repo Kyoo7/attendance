@@ -46,7 +46,7 @@ try {
 }
 
 // Fetch enrolled students
-$sql = "SELECT DISTINCT u.id, u.full_name, u.email, 
+$sql = "SELECT DISTINCT u.id, u.full_name, u.email, u.student_id, u.profile_picture,
         DATE_FORMAT(e.enrollment_date, '%Y-%m-%d %H:%i') as enrolled_at 
         FROM users u 
         INNER JOIN enrollments e ON u.id = e.student_id 
@@ -188,6 +188,8 @@ try {
                     <table>
                         <thead>
                             <tr>
+                                <th>Profile</th>
+                                <th>Student ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
                             </tr>
@@ -195,6 +197,13 @@ try {
                         <tbody>
                             <?php foreach ($students as $student): ?>
                                 <tr>
+                                    <td>
+                                        <div class="student-profile">
+                                            <img src="<?php echo !empty($student['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($student['profile_picture']) : '../assets/images/default-profile.png'; ?>" 
+                                                 alt="Profile" class="profile-image">
+                                        </div>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($student['student_id'] ?? 'N/A'); ?></td>
                                     <td><?php echo htmlspecialchars($student['full_name']); ?></td>
                                     <td><?php echo htmlspecialchars($student['email']); ?></td>
                                 </tr>
@@ -489,6 +498,7 @@ document.querySelector('.close').onclick = function() {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
 }
 
 .students-list th {
@@ -743,5 +753,19 @@ document.querySelector('.close').onclick = function() {
     padding: 10px;
     border-radius: 4px;
     margin: 10px 0;
+}
+
+.student-profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
 }
 </style>

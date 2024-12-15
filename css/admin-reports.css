@@ -160,18 +160,28 @@
     background: #F8FAFC;
 }
 
+/* Progress Bar Styles */
 .progress-bar {
-    width: 100%;
     height: 0.5rem;
-    background: var(--primary-light);
+    background-color: var(--primary-light);
     border-radius: 1rem;
+    margin: 1.5rem 0 0.75rem;
     overflow: hidden;
 }
 
 .progress {
     height: 100%;
-    background: var(--primary-color);
+    background: linear-gradient(90deg, var(--primary-color) 0%, #9c1c60 100%);
     border-radius: 1rem;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.875rem;
+    color: #64748B;
+    text-align: right;
+    display: block;
+    margin-bottom: 1rem;
 }
 
 .status-badge {

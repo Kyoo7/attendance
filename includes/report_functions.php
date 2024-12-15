@@ -4,12 +4,6 @@ require_once '../config/database.php';
 function getOverallStatistics($startDate = null, $endDate = null) {
     global $conn;
     
-    // Log input parameters for debugging
-    error_log("getOverallStatistics called with parameters: " . 
-        "startDate = " . ($startDate ? $startDate : 'NULL') . 
-        ", endDate = " . ($endDate ? $endDate : 'NULL')
-    );
-
     $stats = [
         'total_students' => 0,
         'total_sessions' => 0,
@@ -19,92 +13,86 @@ function getOverallStatistics($startDate = null, $endDate = null) {
     ];
 
     try {
-        // Validate date range if provided
-        if ($startDate && $endDate) {
-            $startTimestamp = strtotime($startDate);
-            $endTimestamp = strtotime($endDate);
-            
-            if ($startTimestamp === false || $endTimestamp === false) {
-                error_log("Invalid date format: startDate = $startDate, endDate = $endDate");
-                return $stats;
-            }
-            
-            if ($startTimestamp > $endTimestamp) {
-                error_log("Invalid date range: Start date is after end date");
-                return $stats;
-            }
-        }
+        // Get total active students
+        $stmt = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'student' AND status = 'active'");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stats['total_students'] = (int)$row['count'];
 
-        // Detailed database connection check
-        if (!$conn) {
-            error_log("Database connection is null");
-            return $stats;
-        }
-
-        // Get total students
-        $totalStudentsQuery = "SELECT COUNT(*) as count FROM users WHERE LOWER(role) = 'student'";
-        $stmt = $conn->prepare($totalStudentsQuery);
-        
-        if ($stmt->execute()) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stats['total_students'] = (int)$row['count'];
-            error_log("Total students found: " . $stats['total_students']);
-        } else {
-            error_log("Failed to execute total students query: " . print_r($stmt->errorInfo(), true));
-        }
-
-        // Get total sessions
+        // Get total sessions with date filter if provided
         $sessionsQuery = "SELECT COUNT(*) as count FROM sessions";
-        $stmt = $conn->prepare($sessionsQuery);
-        
-        if ($stmt->execute()) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stats['total_sessions'] = $row['count'];
-            error_log("Total sessions found: " . $stats['total_sessions']);
-        } else {
-            error_log("Failed to execute total sessions query: " . print_r($stmt->errorInfo(), true));
-        }
-
-        // Calculate average attendance with optional date filtering
-        $attendanceQuery = "
-            SELECT AVG(
-                CASE WHEN status = 'present' THEN 1 ELSE 0 END
-            ) * 100 as avg_attendance
-            FROM attendance
-        ";
         $params = [];
         
         if ($startDate && $endDate) {
-            $attendanceQuery .= " WHERE date BETWEEN :start_date AND :end_date";
-            $params = [
-                ':start_date' => $startDate,
-                ':end_date' => $endDate
-            ];
+            $sessionsQuery .= " WHERE date BETWEEN ? AND ?";
+            $params = [$startDate, $endDate];
         }
         
-        $stmt = $conn->prepare($attendanceQuery);
-        
-        if ($stmt->execute($params)) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stats['avg_attendance'] = $row['avg_attendance'] ? round($row['avg_attendance'], 1) : 0;
-            error_log("Average attendance calculated: " . $stats['avg_attendance']);
-        } else {
-            error_log("Failed to execute average attendance query: " . print_r($stmt->errorInfo(), true));
-        }
+        $stmt = $conn->prepare($sessionsQuery);
+        $stmt->execute($params);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stats['total_sessions'] = (int)$row['count'];
 
         // Get monthly attendance data
         $monthlyQuery = "
             SELECT 
-                DATE_FORMAT(date, '%Y-%m') as month,
-                AVG(CASE WHEN status = 'present' THEN 1 ELSE 0 END) * 100 as attendance_rate
-            FROM attendance
-            GROUP BY DATE_FORMAT(date, '%Y-%m')
-            ORDER BY month DESC
-            LIMIT 6
+                DATE_FORMAT(s.date, '%Y-%m') as month,
+                COUNT(DISTINCT s.id) as total_sessions,
+                COUNT(DISTINCT CASE WHEN a.status = 'present' THEN a.id END) as present_count,
+                COUNT(DISTINCT CASE WHEN a.status = 'late' THEN a.id END) as late_count,
+                COUNT(DISTINCT CASE WHEN a.status = 'absent' THEN a.id END) as absent_count
+            FROM sessions s
+            LEFT JOIN attendance a ON s.id = a.session_id
         ";
-        $stmt = $conn->query($monthlyQuery);
-        $stats['monthly_attendance'] = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
-        error_log("Monthly attendance data count: " . count($stats['monthly_attendance']));
+        
+        if ($startDate && $endDate) {
+            $monthlyQuery .= " WHERE s.date BETWEEN ? AND ?";
+        }
+        
+        $monthlyQuery .= " GROUP BY DATE_FORMAT(s.date, '%Y-%m') ORDER BY month DESC";
+        
+        $stmt = $conn->prepare($monthlyQuery);
+        if ($startDate && $endDate) {
+            $stmt->execute([$startDate, $endDate]);
+        } else {
+            $stmt->execute();
+        }
+        
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $totalAttendance = $row['present_count'] + $row['late_count'] + $row['absent_count'];
+            if ($totalAttendance > 0) {
+                $stats['monthly_attendance'][] = [
+                    'month' => $row['month'],
+                    'attendance_rate' => round(($row['present_count'] / $totalAttendance) * 100, 1),
+                    'late_rate' => round(($row['late_count'] / $totalAttendance) * 100, 1),
+                    'absent_rate' => round(($row['absent_count'] / $totalAttendance) * 100, 1)
+                ];
+            }
+        }
+
+        // Calculate overall average attendance
+        $avgQuery = "
+            SELECT 
+                COUNT(DISTINCT CASE WHEN a.status = 'present' THEN a.id END) as present_count,
+                COUNT(DISTINCT CASE WHEN a.status = 'late' THEN a.id END) as late_count,
+                COUNT(DISTINCT CASE WHEN a.status = 'absent' THEN a.id END) as absent_count
+            FROM sessions s
+            LEFT JOIN attendance a ON s.id = a.session_id
+        ";
+        
+        if ($startDate && $endDate) {
+            $avgQuery .= " WHERE s.date BETWEEN ? AND ?";
+            $stmt = $conn->prepare($avgQuery);
+            $stmt->execute([$startDate, $endDate]);
+        } else {
+            $stmt = $conn->prepare($avgQuery);
+            $stmt->execute();
+        }
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $totalAttendance = $row['present_count'] + $row['late_count'] + $row['absent_count'];
+        if ($totalAttendance > 0) {
+            $stats['avg_attendance'] = round(($row['present_count'] / $totalAttendance) * 100, 1);
+        }
 
         // Get course performance data
         $courseQuery = "
@@ -113,43 +101,55 @@ function getOverallStatistics($startDate = null, $endDate = null) {
                 c.course_code,
                 c.course_name,
                 u.full_name as lecturer_name,
-                (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) as total_students,
-                (
-                    SELECT AVG(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) * 100
-                    FROM attendance a
-                    JOIN sessions s ON a.session_id = s.id
-                    WHERE s.course_id = c.id
-                ) as avg_attendance,
+                c.total_sessions,
                 c.status,
-                (
-                    SELECT COUNT(*) 
-                    FROM sessions s 
-                    WHERE s.course_id = c.id AND s.status = 'completed'
-                ) * 100.0 / c.total_sessions as progress
+                COUNT(DISTINCT e.student_id) as enrolled_students,
+                COUNT(DISTINCT s.id) as completed_sessions,
+                COUNT(DISTINCT CASE WHEN a.status = 'present' THEN a.id END) as present_count,
+                COUNT(DISTINCT CASE WHEN a.status = 'late' THEN a.id END) as late_count,
+                COUNT(DISTINCT CASE WHEN a.status = 'absent' THEN a.id END) as absent_count
             FROM courses c
             LEFT JOIN users u ON c.lecturer_id = u.id
-            WHERE c.status = 'active'
-            ORDER BY c.course_code
+            LEFT JOIN enrollments e ON c.id = e.course_id
+            LEFT JOIN sessions s ON c.id = s.course_id
+            LEFT JOIN attendance a ON s.id = a.session_id
         ";
-        $stmt = $conn->query($courseQuery);
-        $stats['course_data'] = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
-        error_log("Course data count: " . count($stats['course_data']));
-
-        // Final validation and logging
-        if (empty($stats['course_data'])) {
-            error_log("No course data found in report generation");
+        
+        if ($startDate && $endDate) {
+            $courseQuery .= " WHERE (s.date BETWEEN ? AND ? OR s.date IS NULL)";
+        }
+        
+        $courseQuery .= " GROUP BY c.id, c.course_code, c.course_name, u.full_name, c.total_sessions, c.status";
+        
+        $stmt = $conn->prepare($courseQuery);
+        if ($startDate && $endDate) {
+            $stmt->execute([$startDate, $endDate]);
+        } else {
+            $stmt->execute();
+        }
+        
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $totalAttendance = $row['present_count'] + $row['late_count'] + $row['absent_count'];
+            $progress = $row['total_sessions'] > 0 ? 
+                round(($row['completed_sessions'] / $row['total_sessions']) * 100, 1) : 0;
+            
+            $stats['course_data'][] = [
+                'course_code' => $row['course_code'],
+                'course_name' => $row['course_name'],
+                'lecturer_name' => $row['lecturer_name'],
+                'total_students' => $row['enrolled_students'],
+                'avg_attendance' => $totalAttendance > 0 ? 
+                    round(($row['present_count'] / $totalAttendance) * 100, 1) : 0,
+                'progress' => $progress,
+                'status' => $row['status']
+            ];
         }
 
-        return $stats;
-    } catch (PDOException $e) {
-        error_log("Critical error in getOverallStatistics: " . $e->getMessage());
-        error_log("Error details: " . print_r($e, true));
-        // Return minimal stats to prevent complete failure
-        return $stats;
     } catch (Exception $e) {
-        error_log("Unexpected error in getOverallStatistics: " . $e->getMessage());
-        return $stats;
+        error_log("Error in getOverallStatistics: " . $e->getMessage());
     }
+
+    return $stats;
 }
 
 function getAttendanceTrend() {

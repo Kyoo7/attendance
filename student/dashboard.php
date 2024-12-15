@@ -194,7 +194,7 @@ try {
     <!-- Current Session Section -->
     <?php if ($currentSession): ?>
     <div class="current-session-section">
-        <h2><i class="fas fa-clock"></i> Current Session</h2>
+        <h2>Current Session</h2>
         <div class="current-session-card">
             <div class="session-header">
                 <div class="course-info">
@@ -229,7 +229,7 @@ try {
 
     <!-- Upcoming Sessions -->
     <div class="section">
-        <h2><i class="fas fa-calendar-alt"></i> Upcoming Sessions</h2>
+        <h2> Upcoming Sessions</h2>
         <div class="upcoming-sessions">
             <?php if (empty($upcoming_sessions)): ?>
                 <p class="no-data">No upcoming sessions scheduled.</p>
@@ -253,7 +253,7 @@ try {
 
     <!-- Enrolled Courses -->
     <div class="section">
-        <h2><i class="fas fa-graduation-cap"></i> My Courses</h2>
+        <h2> My Courses</h2>
         <div class="courses-grid">
             <?php if (empty($courses)): ?>
                 <p class="no-data">You are not enrolled in any courses yet.</p>

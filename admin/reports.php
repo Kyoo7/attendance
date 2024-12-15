@@ -143,11 +143,15 @@ if (isset($_GET['ajax'])) {
     <div class="chart-section">
         <div class="chart-card">
             <h3>Monthly Attendance Overview</h3>
-            <canvas id="attendanceChart"></canvas>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="attendanceChart"></canvas>
+            </div>
         </div>
         <div class="chart-card">
             <h3>Course Performance Distribution</h3>
-            <canvas id="performanceChart"></canvas>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="performanceChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -171,23 +175,31 @@ if (isset($_GET['ajax'])) {
                     <tbody>
                         <?php foreach ($stats['course_data'] as $course): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($course['course_code'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($course['course_name'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($course['lecturer_name'] ?? ''); ?></td>
-                            <td><?php echo $course['total_students'] ?? '0'; ?></td>
-                            <td><?php echo isset($course['avg_attendance']) ? number_format($course['avg_attendance'], 1) : '0.0'; ?>%</td>
+                            <td><?php echo htmlspecialchars($course['course_code']); ?></td>
+                            <td><?php echo htmlspecialchars($course['course_name']); ?></td>
+                            <td><?php echo htmlspecialchars($course['lecturer_name']); ?></td>
+                            <td><?php echo number_format($course['total_students']); ?></td>
                             <td>
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: <?php echo $course['progress'] ?? '0'; ?>%"></div>
+                                <div class="attendance-rate">
+                                    <?php echo number_format($course['avg_attendance'], 1); ?>%
                                 </div>
                             </td>
-                            <td><span class="status-badge <?php echo strtolower($course['status'] ?? 'unknown'); ?>"><?php echo ucfirst($course['status'] ?? 'Unknown'); ?></span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: <?php echo number_format($course['progress'], 1); ?>%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge <?php echo strtolower($course['status']); ?>">
+                                    <?php echo ucfirst($course['status']); ?>
+                                </span>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>
-                <div class="no-data">No course data available</div>
+                <div class="no-data">No course data available for the selected period</div>
             <?php endif; ?>
         </div>
     </div>
@@ -196,155 +208,120 @@ if (isset($_GET['ajax'])) {
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Prepare data for charts
-    const monthlyData = <?php echo json_encode(isset($stats['monthly_attendance']) ? array_column($stats['monthly_attendance'], 'attendance_rate') : []); ?>;
-    const monthLabels = <?php echo json_encode(isset($stats['monthly_attendance']) ? array_map(function($date) {
-        return date('M', strtotime($date));
-    }, array_column($stats['monthly_attendance'], 'month')) : []); ?>;
-
-    const courseData = <?php echo json_encode(isset($stats['course_data']) && is_array($stats['course_data']) ? $stats['course_data'] : []); ?>;
-    
-    // Attendance Chart
-    const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
-    new Chart(attendanceCtx, {
+    // Monthly Attendance Chart
+    const monthlyData = <?php echo json_encode($stats['monthly_attendance']); ?>;
+    new Chart(document.getElementById('attendanceChart').getContext('2d'), {
         type: 'line',
         data: {
-            labels: monthLabels,
+            labels: monthlyData.map(item => item.month),
             datasets: [{
-                label: 'Overall Attendance',
-                data: monthlyData,
-                borderColor: '#800020',
-                backgroundColor: 'rgba(128, 0, 32, 0.1)',
-                tension: 0.4,
-                fill: true
+                label: 'Attendance Rate',
+                data: monthlyData.map(item => item.attendance_rate),
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                fill: true,
+                tension: 0.4
             }]
         },
         options: {
             responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
-            },
+            maintainAspectRatio: false,
             scales: {
                 y: {
-                    beginAtZero: false,
-                    min: 60,
-                    max: 100
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y.toFixed(1) + '%';
+                        }
+                    }
                 }
             }
         }
     });
 
-    // Only create performance chart if we have course data
-    if (courseData.length > 0) {
-        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-        new Chart(performanceCtx, {
-            type: 'bar',
-            data: {
-                labels: courseData.map(c => c.course_code || ''),
-                datasets: [{
-                    label: 'Average Attendance Rate',
-                    data: courseData.map(c => c.avg_attendance || 0),
-                    backgroundColor: '#800020',
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
+    // Course Performance Distribution Chart
+    const courseData = <?php echo json_encode($stats['course_data']); ?>;
+    const performanceRanges = {
+        'Excellent': courseData.filter(c => c.avg_attendance >= 90).length,
+        'Good': courseData.filter(c => c.avg_attendance >= 80 && c.avg_attendance < 90).length,
+        'Average': courseData.filter(c => c.avg_attendance >= 70 && c.avg_attendance < 80).length,
+        'Poor': courseData.filter(c => c.avg_attendance < 70).length
+    };
+
+    new Chart(document.getElementById('performanceChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(performanceRanges),
+            datasets: [{
+                data: Object.values(performanceRanges),
+                backgroundColor: [
+                    '#4CAF50', // Excellent - Green
+                    '#2196F3', // Good - Blue
+                    '#FFC107', // Average - Yellow
+                    '#F44336'  // Poor - Red
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} courses (${percentage}%)`;
+                        }
                     }
                 }
             }
-        });
-    }
+        }
+    });
 });
 
 function updateReport(event) {
+    event.preventDefault();
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
-    
-    // Validate inputs
+
     if (!startDate || !endDate) {
         alert('Please select both start and end dates');
         return;
     }
 
-    // Validate date range
-    const startTimestamp = new Date(startDate).getTime();
-    const endTimestamp = new Date(endDate).getTime();
-    
-    if (startTimestamp > endTimestamp) {
-        alert('Start date must be before or equal to end date');
+    if (new Date(startDate) > new Date(endDate)) {
+        alert('Start date cannot be after end date');
         return;
     }
 
-    // Prepare URL
-    const url = new URL(window.location.href);
-    url.searchParams.set('start_date', startDate);
-    url.searchParams.set('end_date', endDate);
-
-    // Show loading state
-    const updateButton = event.target.closest('button');
-    const originalContent = updateButton.innerHTML;
-    updateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-    updateButton.disabled = true;
-
-    // Fetch report data
-    fetch(url.toString())
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Validate response data
-            const requiredKeys = ['total_students', 'total_sessions', 'avg_attendance', 'monthly_attendance', 'course_data'];
-            const missingKeys = requiredKeys.filter(key => !data.hasOwnProperty(key));
-            
-            if (missingKeys.length > 0) {
-                throw new Error(`Missing required data: ${missingKeys.join(', ')}`);
-            }
-
-            // Redirect to update the page with new parameters
-            window.location.href = url.toString();
-        })
-        .catch(error => {
-            console.error('Report update error:', error);
-            
-            // Detailed error messaging
-            let errorMessage = 'Error updating report. ';
-            if (error.message.includes('HTTP error')) {
-                errorMessage += 'There was a problem connecting to the server.';
-            } else if (error.message.includes('Missing required data')) {
-                errorMessage += 'The server returned incomplete data.';
-            } else {
-                errorMessage += 'Please check your date range and try again.';
-            }
-            
-            alert(errorMessage);
-            
-            // Restore button state
-            updateButton.innerHTML = originalContent;
-            updateButton.disabled = false;
-        });
+    window.location.href = `reports.php?start_date=${startDate}&end_date=${endDate}`;
 }
 
 function exportReport() {
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
-    
-    // Create export URL with current date range
-    const url = new URL(window.location.origin + '/plswork/actions/export-report.php');
-    if (startDate && endDate) {
-        url.searchParams.set('start_date', startDate);
-        url.searchParams.set('end_date', endDate);
-    }
-    
-    window.location.href = url.toString();
+    const params = new URLSearchParams({ start_date: startDate, end_date: endDate, format: 'csv' });
+    window.location.href = `export_report.php?${params.toString()}`;
 }
 
 function printReport() {

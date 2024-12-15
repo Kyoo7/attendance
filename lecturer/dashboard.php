@@ -85,6 +85,57 @@ $teacher = $stmt->fetch();
     <title>Lecturer Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/lecturer-dashboard.css">
+    <style>
+        /* Time and Calendar Cards Styles */
+        .digital-clock {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+
+        #digital-clock .time {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        #digital-clock .seconds {
+            font-size: 2rem;
+            color: #718096;
+        }
+
+        #digital-clock .period {
+            font-size: 1.5rem;
+            color: #4a5568;
+            margin-left: 0.5rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .bg-white {
+            background-color: white;
+        }
+
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+
+        .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .p-6 {
+            padding: 1.5rem;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -100,15 +151,32 @@ $teacher = $stmt->fetch();
             </div>
         </header>
 
+        <!-- Time and Calendar Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+            <!-- Calendar Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-sm text-gray-500 mb-2"><?php echo date('F', strtotime($currentDate)); ?></div>
+                <div class="text-6xl font-bold text-gray-700 mb-2"><?php echo date('d', strtotime($currentDate)); ?></div>
+                <div class="text-lg text-gray-600"><?php echo date('l', strtotime($currentDate)); ?></div>
+                <div class="text-sm text-gray-500 mt-2"><?php echo date('Y', strtotime($currentDate)); ?></div>
+            </div>
+
+            <!-- Time Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-sm text-gray-500 mb-2">Current Time</div>
+                <div id="digital-clock" class="text-5xl font-bold text-gray-700"></div>
+            </div>
+        </div>
+
         <div class="p-6">
             <!-- Session Card -->
             <div class="session-card">
                 <?php if ($currentSession): ?>
                     <div class="session-header">
                         <h2 class="session-title">Current Session</h2>
-                        <span class="session-status status-ongoing mx-5">In Progress</span>
+                        <span class="session-status status-ongoing mx-5">Ongoing</span>
                     </div>
-                    <div class="session-grid mx-5">
+                    <div class="session-grid">
                         <div class="session-info-item">
                             <span class="info-label">Course</span>
                             <span class="info-value"><?php echo htmlspecialchars($currentSession['course_name']); ?> (<?php echo htmlspecialchars($currentSession['course_code']); ?>)</span>
@@ -118,15 +186,18 @@ $teacher = $stmt->fetch();
                             <span class="info-value"><?php echo htmlspecialchars($currentSession['room']); ?></span>
                         </div>
                         <div class="session-info-item">
-                            <span class="info-label">Time</span>
-                            <span class="info-value"><?php echo date('h:i A', strtotime($currentSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($currentSession['end_time'])); ?></span>
+                            <span class="info-label">Date & Time</span>
+                            <span class="info-value">
+                                <?php echo date('M d, Y', strtotime($currentSession['date'])); ?><br>
+                                <?php echo date('h:i A', strtotime($currentSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($currentSession['end_time'])); ?>
+                            </span>
                         </div>
                         <div class="session-info-item">
                             <span class="info-label">Session Name</span>
                             <span class="info-value"><?php echo htmlspecialchars($currentSession['session_name']); ?></span>
                         </div>
                     </div>
-                <?php elseif (isset($upcomingSession)): ?>
+                <?php elseif (!empty($upcomingSession)): ?>
                     <div class="session-header">
                         <h2 class="session-title">Upcoming Session</h2>
                         <span class="session-status status-scheduled">Scheduled</span>
@@ -153,9 +224,13 @@ $teacher = $stmt->fetch();
                         </div>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-8">
-                        <h2 class="text-2xl font-semibold text-gray-600">No Sessions Scheduled</h2>
-                        <p class="text-gray-500 mt-2">There are no current or upcoming sessions scheduled.</p>
+                    <div class="session-header">
+                        <h2 class="session-title">No Upcoming Sessions</h2>
+                    </div>
+                    <div class="session-grid">
+                        <div class="session-info-item mx-5">
+                            <p class="text-gray-600">There are no current or upcoming sessions scheduled. You can create a new session from your course pages.</p>
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>
@@ -430,6 +505,26 @@ $teacher = $stmt->fetch();
                 }
             });
         });
+
+        // Digital Clock Function
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = (hours % 12) || 12;
+            
+            document.getElementById('digital-clock').innerHTML = `
+                <span class="time">${formattedHours}:${minutes}</span>
+                <span class="seconds">:${seconds}</span>
+                <span class="period">${period}</span>
+            `;
+        }
+
+        // Update clock every second
+        setInterval(updateClock, 1000);
+        updateClock(); // Initial call
     </script>
 </body>
 </html>

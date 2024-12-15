@@ -26,8 +26,8 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../css/admin-dashboard.css">
     <link rel="stylesheet" href="../css/admin-forms.css">
     <link rel="stylesheet" href="../css/admin-courses.css">
+    <link rel="stylesheet" href="../css/admin-reports.css">
     <link rel="stylesheet" href="../css/admin-activities.css">
-    <link rel="stylesheet" href="../css/modern.css">
     <link rel="stylesheet" href="../css/student-dashboard.css">
     <link rel="stylesheet" href="../css/lecturer-dashboard.css">
     
