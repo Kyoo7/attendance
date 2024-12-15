@@ -106,9 +106,9 @@ $teacher = $stmt->fetch();
                 <?php if ($currentSession): ?>
                     <div class="session-header">
                         <h2 class="session-title">Current Session</h2>
-                        <span class="session-status status-ongoing">In Progress</span>
+                        <span class="session-status status-ongoing mx-5">In Progress</span>
                     </div>
-                    <div class="session-grid">
+                    <div class="session-grid mx-5">
                         <div class="session-info-item">
                             <span class="info-label">Course</span>
                             <span class="info-value"><?php echo htmlspecialchars($currentSession['course_name']); ?> (<?php echo htmlspecialchars($currentSession['course_code']); ?>)</span>
@@ -164,8 +164,19 @@ $teacher = $stmt->fetch();
             <?php if ($currentSession && !empty($students)): ?>
             <div class="student-list-section">
                 <div class="student-list-header">
-                    <h2 class="text-2xl font-semibold">Attendance List</h2>
-                    <input type="search" placeholder="Search students..." class="search-input">
+                    <div class="flex justify-between items-center gap-20">
+                        <h2 class="text-2xl font-semibold">Attendance List</h2>
+                        <div class="flex gap-5">
+                        <input type="search" placeholder="Search students..." class="search-input">
+                            <button id="generateQRBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2m0 0H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Generate QR Code
+                            </button>
+                            
+                        </div>
+                    </div>
                 </div>
 
                 <div class="student-list">
@@ -216,6 +227,37 @@ $teacher = $stmt->fetch();
         </div>
     </div>
 
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Attendance QR Code</h3>
+                <button id="closeQRModal" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="text-center">
+                <canvas id="qrcode" width="200" height="200" class="mx-auto mb-4"></canvas>
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-2">Attendance Link:</p>
+                    <p id="attendanceLink" class="text-sm text-blue-600 break-all"></p>
+                </div>
+                <div class="flex justify-center gap-2">
+                    <button id="copyLink" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+                        Copy Link
+                    </button>
+                    <button id="refreshQR" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+                        Refresh QR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    
     <script>
         async function markAttendance(studentId, status) {
             const sessionId = <?php echo $currentSession ? $currentSession['id'] : 'null'; ?>;
@@ -305,6 +347,86 @@ $teacher = $stmt->fetch();
                     card.style.display = '';
                 } else {
                     card.style.display = 'none';
+                }
+            });
+        });
+
+        // QR Code Generation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateQRBtn = document.getElementById('generateQRBtn');
+            const qrModal = document.getElementById('qrModal');
+            const closeQRModal = document.getElementById('closeQRModal');
+            const copyLinkBtn = document.getElementById('copyLink');
+            const refreshQRBtn = document.getElementById('refreshQR');
+            const attendanceLinkElem = document.getElementById('attendanceLink');
+            
+            let currentSessionId = <?php echo $currentSession ? $currentSession['id'] : 'null'; ?>;
+            let qr = null;
+            
+            async function generateQRCode() {
+                if (!currentSessionId) {
+                    alert('No active session found');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('../api/attendance_token.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'generate',
+                            session_id: currentSessionId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        const attendanceUrl = `${window.location.origin}/Attendance2/student/mark_attendance.php?token=${data.token}`;
+                        
+                        // Generate QR code
+                        if (!qr) {
+                            qr = new QRious({
+                                element: document.getElementById('qrcode'),
+                                size: 200,
+                                level: 'H'
+                            });
+                        }
+                        qr.value = attendanceUrl;
+                        
+                        // Display link
+                        attendanceLinkElem.textContent = attendanceUrl;
+                        
+                        // Show modal
+                        qrModal.classList.remove('hidden');
+                        qrModal.classList.add('flex');
+                    } else {
+                        alert('Failed to generate QR code: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to generate QR code');
+                }
+            }
+            
+            // Event listeners
+            generateQRBtn.addEventListener('click', generateQRCode);
+            refreshQRBtn.addEventListener('click', generateQRCode);
+            
+            closeQRModal.addEventListener('click', () => {
+                qrModal.classList.add('hidden');
+                qrModal.classList.remove('flex');
+            });
+            
+            copyLinkBtn.addEventListener('click', async () => {
+                const link = attendanceLinkElem.textContent;
+                try {
+                    await navigator.clipboard.writeText(link);
+                    alert('Link copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                    alert('Failed to copy link');
                 }
             });
         });

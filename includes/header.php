@@ -29,6 +29,7 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../css/admin-activities.css">
     <link rel="stylesheet" href="../css/modern.css">
     <link rel="stylesheet" href="../css/student-dashboard.css">
+    <link rel="stylesheet" href="../css/lecturer-dashboard.css">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -38,6 +39,9 @@ if (!isset($_SESSION['user_id'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 </head>
 <body>
     <div class="wrapper">
