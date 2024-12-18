@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 11, 2024 at 07:35 PM
+-- Generation Time: Dec 16, 2024 at 09:14 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `attendance_system`
+-- Database: `attendance_db`
 --
 
 -- --------------------------------------------------------
@@ -48,9 +48,12 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `course_id`, `date`, `start_time`, `end_time`, `status`, `created_at`, `updated_at`, `session_name`, `description`, `room`, `session_date`, `created_by`) VALUES
-(20, 11, '2024-12-12', '00:52:00', '12:59:00', 'ongoing', '2024-12-11 17:52:50', '2024-12-11 18:25:36', 'IDK', 'HI', 'W3', NULL, NULL),
-(21, 11, '2024-12-11', '10:03:00', '16:03:00', 'completed', '2024-12-11 18:03:48', '2024-12-11 18:25:36', 'IDK2', 'adad', '23', NULL, NULL),
-(23, 11, '2024-12-14', '08:26:00', '11:30:00', 'scheduled', '2024-12-11 18:26:53', '2024-12-11 18:26:53', 'Working?', 'HI', 'W3', NULL, NULL);
+(20, 11, '2024-12-12', '00:52:00', '12:58:00', 'completed', '2024-12-11 17:52:50', '2024-12-12 08:01:04', 'IDK', 'HI', 'W3', NULL, NULL),
+(23, 11, '2024-12-12', '20:26:00', '23:55:00', 'completed', '2024-12-11 18:26:53', '2024-12-13 02:04:40', 'Working?', 'HI', 'W3', NULL, NULL),
+(25, 11, '2024-12-12', '13:30:00', '16:30:00', 'completed', '2024-12-12 07:46:43', '2024-12-12 13:34:55', 'Current', '', 'E2', NULL, NULL),
+(26, 11, '2024-12-12', '14:53:00', '16:30:00', 'completed', '2024-12-12 07:53:53', '2024-12-12 13:34:55', 'Testing', '', 'W3', NULL, NULL),
+(29, 11, '2024-12-13', '08:30:00', '11:30:00', 'completed', '2024-12-13 02:05:30', '2024-12-13 04:30:31', 'Testing', '', 'E2', NULL, NULL),
+(30, 12, '2024-12-15', '08:30:00', '11:30:00', 'completed', '2024-12-15 02:57:14', '2024-12-16 04:45:29', 'Testing', 'Testing', 'W3', NULL, NULL);
 
 --
 -- Triggers `sessions`
@@ -90,7 +93,7 @@ ALTER TABLE `sessions`
 -- AUTO_INCREMENT for table `sessions`
 --
 ALTER TABLE `sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- Constraints for dumped tables

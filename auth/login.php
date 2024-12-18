@@ -32,6 +32,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role'] = $user['role'];
             $_SESSION['full_name'] = $user['full_name'];
             
+            // Handle "Remember Me"
+    if (isset($_POST['remember_me'])) {
+        $token = bin2hex(random_bytes(32)); // Generate a secure token
+        $expires = date('Y-m-d H:i:s', strtotime('+30 days'));
+        
+        // Store the remember me token
+        $stmt = $conn->prepare("INSERT INTO remember_me (user_id, token, expires_at) VALUES (?, ?, ?)");
+        $stmt->execute([$user['id'], $token, $expires]);
+        
+        // Set a secure cookie that expires in 30 days
+        setcookie('remember_token', $token, [
+            'expires' => strtotime('+30 days'),
+            'path' => '/',
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Strict'
+        ]);
+    }
             // Debug information
             error_log("Login successful - Role: " . $user['role']);
             

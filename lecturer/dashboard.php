@@ -200,9 +200,9 @@ $teacher = $stmt->fetch();
                 <?php elseif (!empty($upcomingSession)): ?>
                     <div class="session-header">
                         <h2 class="session-title">Upcoming Session</h2>
-                        <span class="session-status status-scheduled">Scheduled</span>
+                        <span class="session-status status-scheduled mx-5">Scheduled</span>
                     </div>
-                    <div class="session-grid">
+                    <div class="session-grid mx-4">
                         <div class="session-info-item">
                             <span class="info-label">Course</span>
                             <span class="info-value"><?php echo htmlspecialchars($upcomingSession['course_name']); ?> (<?php echo htmlspecialchars($upcomingSession['course_code']); ?>)</span>

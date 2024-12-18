@@ -44,10 +44,17 @@
                             <label for="password">Password</label>
                             <input type="password" id="password" name="password" placeholder="At least 8 characters" required>
                         </div>
-                        
+
+                    <div class="form-group1">
                         <div class="forgot-password">
                             <a href="auth/forgot-password.php">Forgot Password?</a>
                         </div>
+
+                        <div class="remember-me">
+                            <label for="remember_me">Remember Me</label>
+                            <input type="checkbox" name="remember_me" id="remember_me">
+                        </div>
+                    </div>
                         
                         <button type="submit" class="sign-in-btn">Sign in</button>
                     </form>

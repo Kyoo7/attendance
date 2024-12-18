@@ -1,22 +1,23 @@
 <?php
 session_start();
+require_once '../config/database.php';
 
-// Unset all session variables
-$_SESSION = array();
-
-// Destroy the session
-session_destroy();
-
-// Delete the session cookie
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
+if (isset($_COOKIE['remember_token'])) {
+    // Delete the remember me token from database
+    $stmt = $conn->prepare("DELETE FROM remember_me WHERE token = ?");
+    $stmt->execute([$_COOKIE['remember_token']]);
+    
+    // Delete the cookie
+    setcookie('remember_token', '', [
+        'expires' => time() - 3600,
+        'path' => '/',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
 }
 
-// Redirect to the login page
+session_destroy();
 header("Location: ../index.php");
 exit();
 ?>

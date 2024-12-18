@@ -154,8 +154,8 @@ try {
     <!-- Quick Stats -->
     <div class="stats-container">
         <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-chart-line"></i>
+            <div class="stat-icon status-present">
+                <i class="fas fa-chart-line" style="color: var(--primary-color);"></i>
             </div>
             <div class="stat-info">
                 <h3><?php echo $attendance_stats['attendance_rate']; ?>%</h3>
@@ -163,8 +163,8 @@ try {
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-check-circle"></i>
+            <div class="stat-icon status-present">
+                <i class="fas fa-check-circle" style="color: var(--sucess-color);"></i>
             </div>
             <div class="stat-info">
                 <h3><?php echo $attendance_stats['present_count']; ?></h3>
@@ -172,8 +172,8 @@ try {
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-clock"></i>
+            <div class="stat-icon status-late">
+                <i class="fas fa-clock" style="color: var(--warning-color);"></i>
             </div>
             <div class="stat-info">
                 <h3><?php echo $attendance_stats['late_count']; ?></h3>
@@ -181,8 +181,8 @@ try {
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-times-circle"></i>
+            <div class="stat-icon status-absent">
+                <i class="fas fa-times-circle " style="color: var(--danger-color);"></i>
             </div>
             <div class="stat-info">
                 <h3><?php echo $attendance_stats['absent_count']; ?></h3>
@@ -211,7 +211,7 @@ try {
             </div>
             <div class="session-details">
                 <div class="detail-item">
-                    <i class="fas fa-user"></i>
+                    <i class="fas fa-user" "></i>
                     <span>Lecturer: <?php echo htmlspecialchars($currentSession['lecturer_name']); ?></span>
                 </div>
                 <div class="detail-item">
@@ -265,8 +265,8 @@ try {
                             <span class="course-code"><?php echo htmlspecialchars($course['course_code']); ?></span>
                         </div>
                         <div class="course-info">
-                            <p><i class="fas fa-user"></i> <?php echo htmlspecialchars($course['lecturer_name']); ?></p>
-                            <p><i class="fas fa-calendar"></i> <?php echo date('M d, Y', strtotime($course['start_date'])); ?> - <?php echo date('M d, Y', strtotime($course['end_date'])); ?></p>
+                            <p><i class="fas fa-user" style="color: var(--primary-color)";></i> <?php echo htmlspecialchars($course['lecturer_name']); ?></p>
+                            <p><i class="fas fa-calendar" style="color: var(--primary-color)"></i> <?php echo date('M d, Y', strtotime($course['start_date'])); ?> - <?php echo date('M d, Y', strtotime($course['end_date'])); ?></p>
                             <div class="attendance-progress">
                                 <?php 
                                     $attendance_rate = $course['total_sessions'] > 0 

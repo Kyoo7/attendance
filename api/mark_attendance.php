@@ -146,7 +146,7 @@ try {
         'data' => [
             'student_id' => $student_id,
             'status' => $status,
-            'time_marked' => $current_time->format('h:i A')
+            'time_marked' => $current_time->format('H:i A')
         ]
     ]);
 

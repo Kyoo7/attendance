@@ -72,7 +72,7 @@ try {
     <div class="course-stats">
         <div class="stat-card">
             <div class="stat-icon">
-                <i class="fas fa-book"></i>
+                <i class="fas fa-book" style="color: var(--primary-color);"></i>
             </div>
             <div class="stat-info">
                 <h3>My Courses</h3>
@@ -81,7 +81,7 @@ try {
         </div>
         <div class="stat-card">
             <div class="stat-icon">
-                <i class="fas fa-users"></i>
+                <i class="fas fa-users" style="color: var(--primary-color);"></i>
             </div>
             <div class="stat-info">
                 <h3>Total Students</h3>
@@ -90,7 +90,7 @@ try {
         </div>
         <div class="stat-card">
             <div class="stat-icon">
-                <i class="fas fa-calendar-check"></i>
+                <i class="fas fa-calendar-check" style="color: var(--primary-color);"></i>
             </div>
             <div class="stat-info">
                 <h3>Total Sessions</h3>

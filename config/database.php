@@ -3,7 +3,7 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'attendance_system');
+define('DB_NAME', 'attendance_db');
 
 try {
     // Create PDO connection
@@ -22,8 +22,12 @@ try {
     $conn->exec("SET time_zone = '+07:00'");
     
 } catch(PDOException $e) {
-    // Log the error
-    error_log("Database Connection Error: " . $e->getMessage());
+    // Log detailed error information
+    error_log("Database Connection Error Details:");
+    error_log("Message: " . $e->getMessage());
+    error_log("Code: " . $e->getCode());
+    error_log("File: " . $e->getFile());
+    error_log("Line: " . $e->getLine());
     
     // Display user-friendly error message
     die("Sorry, there was a problem connecting to the database. Please try again later.");

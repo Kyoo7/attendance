@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #2563eb;
+    --primary-color: #8d0054;
     --primary-dark: #1d4ed8;
     --primary-light: #dbeafe;
     --success-color: #22c55e;
@@ -11,7 +11,7 @@
     --border-color: #e5e7eb;
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     --hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --accent-color: #4A90E2;
+    --accent-color: #6c6c6c;
     --pending-color: #9CA3AF;
     --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     --border-radius: 12px;
@@ -105,11 +105,6 @@ button {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(139, 0, 70, 0.1);
-}
-
-.forgot-password {
-    text-align: right;
-    margin-bottom: 1.5rem;
 }
 
 .forgot-password a {
@@ -298,4 +293,34 @@ footer {
 /* These styles will only apply when logged in */
 .logged-in .container {
     padding-left: 280px;
+}
+
+.form-group1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+    width: 100%;
+}
+
+.forgot-password {
+    flex: 1;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.remember-me label {
+    font-size: 0.875rem;
+    margin: 0;
+    cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+    cursor: pointer;
+    margin: 0;
+    width: auto;
 }

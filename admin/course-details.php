@@ -111,10 +111,133 @@ try {
 }
 ?>
 
+<style>
+    :root {
+        --primary-color: #8c0055;
+        --text-color: #ffffff;
+        --border-color: #E2E8F0;
+        --background-color: #F7FAFC;
+        --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-details-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+        padding: 2rem;
+    }
+
+    .course-info-card {
+        margin-bottom: 2rem;
+    }
+
+    .course-header {
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .course-header h3 {
+        color: white !important;
+        font-size: 1.8rem;
+        margin: 0 0 1rem 0;
+    }
+
+    .course-code {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .course-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-item {
+        padding: 1rem;
+        background: var(--background-color);
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+    }
+
+    .detail-item.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .detail-item label {
+        display: block;
+        color: var(--text-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .detail-item span,
+    .detail-item p {
+        color: var(--text-color);
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .alert.success {
+        background-color: #C6F6D5;
+        border: 1px solid #9AE6B4;
+        color: #22543D;
+    }
+
+    .alert.error {
+        background-color: #FED7D7;
+        border: 1px solid #FEB2B2;
+        color: #822727;
+    }
+
+    .alert.warning {
+        background-color: #FEFCBF;
+        border: 1px solid #FAF089;
+        color: #744210;
+    }
+
+    .alert.info {
+        background-color: #BEE3F8;
+        border: 1px solid #90CDF4;
+        color: #2A4365;
+    }
+
+    .sessions-section {
+        margin-bottom: 2rem;
+    }
+
+    .sessions-section h5 {
+        color: var(--text-color);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .sessions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+</style>
+
 <link rel="stylesheet" href="../css/admin-course-details.css">
 
-<div class="dashboard-container">
-    <div class="content-wrapper">
+
         <div class="page-header">
             <h2>Course Details</h2>
             <div class="header-actions">
@@ -124,138 +247,100 @@ try {
             </div>
         </div>
 
-        <?php if(isset($_SESSION['message'])): ?>
-            <div class="alert <?php echo $_SESSION['message_type']; ?>">
-                <?php 
-                    echo $_SESSION['message'];
-                    unset($_SESSION['message']);
-                    unset($_SESSION['message_type']);
-                ?>
-            </div>
-        <?php endif; ?>
 
-        <div class="course-details-container">
-            <div class="course-info-card">
-                <div class="course-header">
-                    <h3><?php echo htmlspecialchars($course['course_name']); ?></h3>
-                    <span class="course-code"><?php echo htmlspecialchars($course['course_code']); ?></span>
-                </div>
+<?php if(isset($_SESSION['message'])): ?>
+    <div class="alert <?php echo $_SESSION['message_type']; ?>">
+        <?php 
+            echo $_SESSION['message'];
+            unset($_SESSION['message']);
+            unset($_SESSION['message_type']);
+        ?>
+    </div>
+<?php endif; ?>
 
-                <div class="course-details-grid">
-                    <div class="detail-item">
-                        <label>Lecturer</label>
-                        <span><?php echo htmlspecialchars($course['lecturer_name'] ?? 'Not Assigned'); ?></span>
-                    </div>
+<div class="course-details-container">
+    <div class="course-info-card">
+        <div class="course-header">
+            <h3><?php echo htmlspecialchars($course['course_name']); ?></h3>
+            <span class="course-code"><?php echo htmlspecialchars($course['course_code']); ?></span>
+        </div>
 
-                    <div class="detail-item">
-                        <label>Enrolled Students</label>
-                        <span><?php echo $course['enrolled_students'] ?? 0; ?></span>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Course Status</label>
-                        <span><?php echo htmlspecialchars(ucfirst($course['status'] ?? 'Unknown')); ?></span>
-                    </div>
-
-                    <div class="detail-item full-width">
-                        <label>Course Description</label>
-                        <p><?php echo htmlspecialchars($course['description'] ?? 'No description available'); ?></p>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Start Date</label>
-                        <span><?php echo date('d M Y', strtotime($course['start_date'])); ?></span>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>End Date</label>
-                        <span><?php echo date('d M Y', strtotime($course['end_date'])); ?></span>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Total Sessions</label>
-                        <span><?php echo $course['total_sessions'] ?? 0; ?></span>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Completed Sessions</label>
-                        <span><?php echo $course['completed_sessions'] ?? 0; ?></span>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Total Attendance</label>
-                        <span><?php echo $course['total_attendance'] ?? 0; ?></span>
-                    </div>
-                </div>
+        <div class="course-details-grid">
+            <div class="detail-item">
+                <label>Lecturer</label>
+                <span><?php echo htmlspecialchars($course['lecturer_name'] ?? 'Not Assigned'); ?></span>
             </div>
 
-            <div class="students-section">
-                <div class="section-header">
-                    <h4>Course Students</h4>
-                    <button class="btn-primary" data-toggle="modal" data-target="#addStudentModal">
-                        <i class="fas fa-plus"></i> Add Student
-                    </button>
-                </div>
-
-                <div class="enrolled-students">
-                    <h5>Enrolled Students (<?php echo count($enrolledStudents); ?>)</h5>
-                    <?php if (empty($enrolledStudents)): ?>
-                        <p>No students enrolled in this course.</p>
-                    <?php else: ?>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Profile</th>
-                                    <th>Student ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($enrolledStudents as $student): ?>
-                                    <tr>
-                                        <td>
-                                            <div class="student-profile">
-                                                <img src="<?php echo !empty($student['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($student['profile_picture']) : '../assets/images/default-profile.png'; ?>" 
-                                                     alt="Profile" class="profile-image">
-                                            </div>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($student['student_id']); ?></td>
-                                        <td><?php echo htmlspecialchars($student['full_name']); ?></td>
-                                        <td><?php echo htmlspecialchars($student['email']); ?></td>
-                                        <td>
-                                            <form action="../actions/remove-student.php" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this student from the course?');">
-                                                <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
-                                                <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
-                                                <button type="submit" class="btn-delete btn-sm">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php endif; ?>
-                </div>
+            <div class="detail-item">
+                <label>Enrolled Students</label>
+                <span><?php echo $course['enrolled_students'] ?? 0; ?></span>
             </div>
 
-            <div class="sessions-section">
-                <div class="section-header">
-                    <h4>Course Sessions</h4>
-                    <a href="../admin/add-session.php?course_id=<?php echo $course_id; ?>" class="btn-primary">
-                        <i class="fas fa-plus"></i> Add New Session
-                    </a>
-                </div>
+            <div class="detail-item">
+                <label>Course Status</label>
+                <span><?php echo htmlspecialchars(ucfirst($course['status'] ?? 'Unknown')); ?></span>
+            </div>
 
-                <?php if (empty($sessions)): ?>
-                    <div class="no-sessions-message">
-                        <p>No sessions have been created for this course yet.</p>
-                    </div>
-                <?php else: ?>
+            
+            <div class="detail-item">
+                <label>Total Sessions</label>
+                <span><?php echo $course['total_sessions'] ?? 0; ?></span>
+            </div>
+
+            <div class="detail-item full-width">
+                <label>Course Description</label>
+                <p><?php echo htmlspecialchars($course['description'] ?? 'No description available'); ?></p>
+            </div>
+
+            <div class="detail-item">
+                <label>Start Date</label>
+                <span><?php echo date('d M Y', strtotime($course['start_date'])); ?></span>
+            </div>
+
+            <div class="detail-item">
+                <label>End Date</label>
+                <span><?php echo date('d M Y', strtotime($course['end_date'])); ?></span>
+            </div>
+
+            <div class="detail-item">
+                <label>Completed Sessions</label>
+                <span><?php echo $course['completed_sessions'] ?? 0; ?></span>
+            </div>
+
+            <div class="detail-item">
+                <label>Total Attendance</label>
+                <span><?php echo $course['total_attendance'] ?? 0; ?></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section-header">
+            <h4>Course Sessions</h4>
+            <a href="../admin/add-session.php?course_id=<?php echo $course_id; ?>" class="btn-primary">
+                <i class="fas fa-plus"></i> Add New Session
+            </a>
+        </div>
+
+        <?php if (empty($sessions)): ?>
+            <div class="no-sessions-message">
+                <p>No sessions have been created for this course yet.</p>
+            </div>
+        <?php else: ?>
+            <?php
+            $upcomingSessions = array_filter($sessions, function($session) {
+                return strtotime($session['session_date']) >= strtotime(date('Y-m-d'));
+            });
+            $pastSessions = array_filter($sessions, function($session) {
+                return strtotime($session['session_date']) < strtotime(date('Y-m-d'));
+            });
+            ?>
+
+            <?php if (!empty($upcomingSessions)): ?>
+                <div class="sessions-section">
+                    <h5 class="mb-3">Upcoming Sessions</h5>
                     <div class="sessions-list">
-                        <?php foreach ($sessions as $session): ?>
+                        <?php foreach ($upcomingSessions as $session): ?>
                             <div class="session-card" onclick="showSessionAttendance(<?php echo $session['id']; ?>)">
                                 <div class="session-header">
                                     <h2><?php echo htmlspecialchars($session['session_name']); ?></h2>
@@ -267,13 +352,7 @@ try {
                                     </div>
                                     <div class="detail-row">
                                         <span class="detail-label">Time:</span>
-                                        <span>
-                                            <?php 
-                                            echo date('H:i', strtotime($session['start_time'])) . 
-                                                 ' - ' . 
-                                                 date('H:i', strtotime($session['end_time'])); 
-                                            ?>
-                                        </span>
+                                        <span><?php echo date('H:i', strtotime($session['start_time'])) . ' - ' . date('H:i', strtotime($session['end_time'])); ?></span>
                                     </div>
                                     <div class="detail-row">
                                         <span class="detail-label">Room:</span>
@@ -283,12 +362,6 @@ try {
                                         <span class="detail-label">Attendance:</span>
                                         <span><?php echo $session['attendance_count']; ?> students</span>
                                     </div>
-                                    <?php if (!empty($session['description'])): ?>
-                                        <div class="detail-row full-width">
-                                            <span class="detail-label">Description:</span>
-                                            <p><?php echo htmlspecialchars($session['description']); ?></p>
-                                        </div>
-                                    <?php endif; ?>
                                 </div>
                                 <div class="session-actions">
                                     <a href="../admin/edit-session.php?id=<?php echo $session['id']; ?>&course_id=<?php echo $course_id; ?>" class="btn-edit" onclick="event.stopPropagation();">
@@ -304,11 +377,104 @@ try {
                             </div>
                         <?php endforeach; ?>
                     </div>
-                <?php endif; ?>
-            </div>
-        </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($pastSessions)): ?>
+                <div class="sessions-section">
+                    <h5>Past Sessions</h5>
+                    <div class="sessions-list">
+                        <?php foreach ($pastSessions as $session): ?>
+                            <div class="session-card" onclick="showSessionAttendance(<?php echo $session['id']; ?>)">
+                                <div class="session-header">
+                                    <h2><?php echo htmlspecialchars($session['session_name']); ?></h2>
+                                </div>
+                                <div class="session-details">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Date:</span>
+                                        <span><?php echo date('d M Y', strtotime($session['session_date'])); ?></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Time:</span>
+                                        <span><?php echo date('H:i', strtotime($session['start_time'])) . ' - ' . date('H:i', strtotime($session['end_time'])); ?></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Room:</span>
+                                        <span><?php echo htmlspecialchars($session['room']); ?></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Attendance:</span>
+                                        <span><?php echo $session['attendance_count']; ?> students</span>
+                                    </div>
+                                </div>
+                                <div class="session-actions">
+                                    <a href="../admin/edit-session.php?id=<?php echo $session['id']; ?>&course_id=<?php echo $course_id; ?>" class="btn-edit" onclick="event.stopPropagation();">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="../actions/delete-session.php" method="POST" class="d-inline" onsubmit="return confirmDelete(event)">
+                                        <input type="hidden" name="session_id" value="<?php echo $session['id']; ?>">
+                                        <button type="submit" class="btn-delete" onclick="event.stopPropagation();">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+
+
+    <div class="section-header">
+        <h4>Course Students</h4>
+        <button class="btn-primary" data-toggle="modal" data-target="#addStudentModal">
+            <i class="fas fa-plus"></i> Add Student
+        </button>
     </div>
-</div>
+
+    <div class="enrolled-students">
+        <h5>Enrolled Students (<?php echo count($enrolledStudents); ?>)</h5>
+        <?php if (empty($enrolledStudents)): ?>
+            <p>No students enrolled in this course.</p>
+        <?php else: ?>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Profile</th>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($enrolledStudents as $student): ?>
+                        <tr>
+                            <td>
+                                <div class="student-profile">
+                                    <img src="<?php echo !empty($student['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($student['profile_picture']) : '../assets/images/default-profile.png'; ?>" 
+                                         alt="Profile" class="profile-image">
+                                </div>
+                            </td>
+                            <td><?php echo htmlspecialchars($student['student_id']); ?></td>
+                            <td><?php echo htmlspecialchars($student['full_name']); ?></td>
+                            <td><?php echo htmlspecialchars($student['email']); ?></td>
+                            <td>
+                                <form action="../actions/remove-student.php" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this student from the course?');">
+                                    <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
+                                    <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
+                                    <button type="submit" class="btn-delete btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
 
 <!-- Add Student Modal -->
 <div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel" style="z-index: 1060 !important;">
