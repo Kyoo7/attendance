@@ -138,15 +138,23 @@ try {
     // Commit transaction
     $conn->commit();
 
+    // Get the time_marked from the database to ensure consistency
+    $stmt = $conn->prepare("
+        SELECT DATE_FORMAT(time_marked, '%H:%i %p') as formatted_time
+        FROM attendance 
+        WHERE student_id = ? AND session_id = ?
+    ");
+    $stmt->execute([$student_id, $session_id]);
+    $time_result = $stmt->fetch(PDO::FETCH_ASSOC);
+
     // Return success response
-    $current_time = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
     echo json_encode([
         'success' => true,
         'message' => 'Attendance marked successfully',
         'data' => [
             'student_id' => $student_id,
             'status' => $status,
-            'time_marked' => $current_time->format('H:i A')
+            'time_marked' => $time_result['formatted_time']
         ]
     ]);
 

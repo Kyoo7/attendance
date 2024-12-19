@@ -53,20 +53,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     $courseId = $session['course_id'];
                     $token = generateToken();
-                    $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
 
                     // Delete any existing tokens for this session
                     $stmt = $conn->prepare("DELETE FROM attendance_tokens WHERE session_id = ?");
                     $stmt->execute([$sessionId]);
 
-                    // Create new token with course_id
-                    $stmt = $conn->prepare("INSERT INTO attendance_tokens (course_id, session_id, token, expires_at) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$courseId, $sessionId, $token, $expiresAt]);
+                    // Create new token without expiration
+                    $stmt = $conn->prepare("INSERT INTO attendance_tokens (course_id, session_id, token) VALUES (?, ?, ?)");
+                    $stmt->execute([$courseId, $sessionId, $token]);
 
                     echo json_encode([
                         'success' => true,
-                        'token' => $token,
-                        'expires_at' => $expiresAt
+                        'token' => $token
                     ]);
                 } catch (PDOException $e) {
                     http_response_code(500);
@@ -88,36 +86,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         SELECT at.session_id, s.start_time 
                         FROM attendance_tokens at
                         JOIN sessions s ON at.session_id = s.id
-                        WHERE at.token = ? AND at.expires_at > NOW()
+                        WHERE at.token = ?
                     ");
                     $stmt->execute([$data['token']]);
                     $tokenData = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     if (!$tokenData) {
                         http_response_code(400);
-                        echo json_encode(['error' => 'Invalid or expired token']);
+                        echo json_encode(['error' => 'Invalid token']);
                         exit;
                     }
 
                     // Determine attendance status based on time
                     $status = determineAttendanceStatus($tokenData['start_time']);
 
-                    // Record attendance
+                    // First check if attendance record exists
                     $stmt = $conn->prepare("
-                        INSERT INTO attendance (session_id, student_id, status, time_marked)
-                        VALUES (?, ?, ?, NOW())
-                        ON DUPLICATE KEY UPDATE status = ?, time_marked = NOW()
+                        SELECT id, status 
+                        FROM attendance 
+                        WHERE session_id = ? AND student_id = ?
                     ");
-                    $stmt->execute([
-                        $tokenData['session_id'],
-                        $data['student_id'],
-                        $status,
-                        $status
-                    ]);
+                    $stmt->execute([$tokenData['session_id'], $data['student_id']]);
+                    $existingRecord = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($existingRecord) {
+                        // Update existing record
+                        $stmt = $conn->prepare("
+                            UPDATE attendance 
+                            SET status = ?, time_marked = NOW(), updated_at = NOW()
+                            WHERE id = ?
+                        ");
+                        $stmt->execute([$status, $existingRecord['id']]);
+                    } else {
+                        // Insert new record
+                        $stmt = $conn->prepare("
+                            INSERT INTO attendance (session_id, student_id, status, time_marked, created_at, updated_at)
+                            VALUES (?, ?, ?, NOW(), NOW(), NOW())
+                        ");
+                        $stmt->execute([
+                            $tokenData['session_id'],
+                            $data['student_id'],
+                            $status
+                        ]);
+                    }
 
                     echo json_encode([
                         'success' => true,
-                        'status' => $status
+                        'status' => $status,
+                        'action' => $existingRecord ? 'updated' : 'created'
                     ]);
                 } catch (PDOException $e) {
                     http_response_code(500);

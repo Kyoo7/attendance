@@ -82,10 +82,14 @@ if ($selected_course_id) {
         <!-- Student Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <?php foreach ($students as $student): 
-                // Calculate attendance percentage
+                // Start with 100% and deduct for absences
                 $total_sessions = $student['total_sessions'] ?: 0;
-                $attendance_percentage = $total_sessions > 0 ? 
-                    round(($student['present_sessions'] / $total_sessions) * 100) : 0;
+                $absent_sessions = $student['absent_sessions'] ?: 0;
+                
+                // Each absence deducts a percentage based on total sessions
+                $deduction_per_absence = $total_sessions > 0 ? (100 / $total_sessions) : 0;
+                $attendance_percentage = max(0, 100 - ($absent_sessions * $deduction_per_absence));
+                $attendance_percentage = round($attendance_percentage);
             ?>
             <div class="student-card" onclick="showStudentDetails(<?php echo htmlspecialchars(json_encode($student)); ?>)">
                 <div class="student-info">

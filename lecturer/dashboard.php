@@ -8,7 +8,7 @@ date_default_timezone_set('Asia/Jakarta');
 
 // Get current date and time
 $currentDate = date('Y-m-d');
-$currentTime = date('H:i:s');
+$currentTime = date('H:i A');
 
 // Get lecturer ID from session
 $lecturer_id = $_SESSION['user_id'];
@@ -60,7 +60,7 @@ if ($currentSession) {
         SELECT 
             u.*,
             a.status as attendance_status,
-            a.time_marked
+            DATE_FORMAT(a.time_marked, '%H:%i %p') as time_marked
         FROM users u 
         JOIN enrollments e ON u.id = e.student_id 
         LEFT JOIN attendance a ON a.student_id = u.id AND a.session_id = ?
@@ -189,7 +189,7 @@ $teacher = $stmt->fetch();
                             <span class="info-label">Date & Time</span>
                             <span class="info-value">
                                 <?php echo date('M d, Y', strtotime($currentSession['date'])); ?><br>
-                                <?php echo date('h:i A', strtotime($currentSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($currentSession['end_time'])); ?>
+                                <?php echo date('H:i A', strtotime($currentSession['start_time'])); ?> - <?php echo date('H:i A', strtotime($currentSession['end_time'])); ?>
                             </span>
                         </div>
                         <div class="session-info-item">
@@ -215,7 +215,7 @@ $teacher = $stmt->fetch();
                             <span class="info-label">Date & Time</span>
                             <span class="info-value">
                                 <?php echo date('M d, Y', strtotime($upcomingSession['date'])); ?><br>
-                                <?php echo date('h:i A', strtotime($upcomingSession['start_time'])); ?> - <?php echo date('h:i A', strtotime($upcomingSession['end_time'])); ?>
+                                <?php echo date('H:i A', strtotime($upcomingSession['start_time'])); ?> - <?php echo date('H:i A', strtotime($upcomingSession['end_time'])); ?>
                             </span>
                         </div>
                         <div class="session-info-item">
@@ -274,11 +274,7 @@ $teacher = $stmt->fetch();
                                     <?php echo ucfirst($student['attendance_status']); ?>
                                     <?php if ($student['time_marked']): ?>
                                         <span class="time-marked">
-                                            <?php 
-                                                $time = new DateTime($student['time_marked'], new DateTimeZone('UTC'));
-                                                $time->setTimezone(new DateTimeZone('Asia/Jakarta'));
-                                                echo $time->format('h:i A'); 
-                                            ?>
+                                            <?php echo $student['time_marked']; ?>
                                         </span>
                                     <?php endif; ?>
                                 </span>

@@ -142,35 +142,79 @@ try {
                 <p class="no-data">No sessions created yet.</p>
             <?php else: ?>
                 <div class="sessions-list">
-                    <?php foreach ($sessions as $session): ?>
-                        <?php
-                            $current_date = date('Y-m-d');
-                            $current_time = date('H:i:s');
-                            $session_date = $session['date'];
-                            $session_time = $session['start_time'];
-                            
-                            // Determine session status
-                            if ($session_date < $current_date || ($session_date == $current_date && $session_time < $current_time)) {
-                                $status = 'completed';
-                            } elseif ($session_date == $current_date && 
-                                    strtotime($session_time) <= strtotime('+1 hour') && 
-                                    strtotime($session_time) >= strtotime('-1 hour')) {
-                                $status = 'ongoing';
-                            } else {
-                                $status = 'pending';
+                    <?php 
+                    // Group sessions by week
+                    $weeklyGroups = [];
+                    $startDate = strtotime($course['start_date']);
+                    $currentDate = strtotime(date('Y-m-d'));
+                    $currentWeek = ceil((($currentDate - $startDate) / 86400 + 1) / 7);
+                    
+                    foreach ($sessions as $session) {
+                        $sessionDate = strtotime($session['date']);
+                        $weekNumber = ceil((($sessionDate - $startDate) / 86400 + 1) / 7);
+                        if ($weekNumber > 0 && $weekNumber <= 10) {
+                            if (!isset($weeklyGroups[$weekNumber])) {
+                                $weeklyGroups[$weekNumber] = [];
                             }
-                        ?>
-                        <div class="session-card" onclick="showSessionAttendance(<?php echo $session['id']; ?>)">
-                            <div class="session-info">
-                                <h4><?php echo htmlspecialchars($session['session_name']); ?></h4>
-                                <p>Time: <?php echo date('h:i A', strtotime($session['start_time'])); ?> - <?php echo date('h:i A', strtotime($session['end_time'])); ?></p>
-                                <p>Date: <?php echo date('M d, Y', strtotime($session['date'])); ?></p>
-                                <p>Room: <?php echo htmlspecialchars($session['room']); ?></p>
-                            </div>
-                            <div class="session-actions">
-                                <span class="session-status <?php echo $status; ?>">
-                                    <?php echo ucfirst($status); ?>
-                                </span>
+                            $weeklyGroups[$weekNumber][] = $session;
+                        }
+                    }
+                    
+                    // Sort weeks but put current week first
+                    ksort($weeklyGroups);
+                    $sortedGroups = [];
+                    
+                    // Add current week first if it exists
+                    if (isset($weeklyGroups[$currentWeek])) {
+                        $sortedGroups[$currentWeek] = $weeklyGroups[$currentWeek];
+                        unset($weeklyGroups[$currentWeek]);
+                    }
+                    
+                    // Add remaining weeks
+                    $sortedGroups += $weeklyGroups;
+                    
+                    // Display sessions by week
+                    foreach ($sortedGroups as $week => $weekSessions): ?>
+                        <div class="week-group <?php echo ($week == $currentWeek) ? 'current-week' : ''; ?>">
+                            <h4 class="week-header">
+                                Week <?php echo $week; ?>
+                                <?php if ($week == $currentWeek): ?>
+                                    <span class="current-week-badge">Current Week</span>
+                                <?php endif; ?>
+                            </h4>
+                            <div class="week-sessions">
+                                <?php foreach ($weekSessions as $session): ?>
+                                    <?php
+                                        $current_date = date('Y-m-d');
+                                        $current_time = date('H:i:s');
+                                        $session_date = $session['date'];
+                                        $session_time = $session['start_time'];
+                                        
+                                        // Determine session status
+                                        if ($session_date < $current_date || ($session_date == $current_date && $session_time < $current_time)) {
+                                            $status = 'completed';
+                                        } elseif ($session_date == $current_date && 
+                                                strtotime($session_time) <= strtotime('+1 hour') && 
+                                                strtotime($session_time) >= strtotime('-1 hour')) {
+                                            $status = 'ongoing';
+                                        } else {
+                                            $status = 'pending';
+                                        }
+                                    ?>
+                                    <div class="session-card" onclick="showSessionAttendance(<?php echo $session['id']; ?>)">
+                                        <div class="session-info">
+                                            <h4><?php echo htmlspecialchars($session['session_name']); ?></h4>
+                                            <p>Time: <?php echo date('h:i A', strtotime($session['start_time'])); ?> - <?php echo date('h:i A', strtotime($session['end_time'])); ?></p>
+                                            <p>Date: <?php echo date('M d, Y', strtotime($session['date'])); ?></p>
+                                            <p>Room: <?php echo htmlspecialchars($session['room']); ?></p>
+                                        </div>
+                                        <div class="session-actions">
+                                            <span class="session-status <?php echo $status; ?>">
+                                                <?php echo ucfirst($status); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -767,5 +811,55 @@ document.querySelector('.close').onclick = function() {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #e9ecef;
+}
+
+/* Add styles for pending sessions */
+.session-card {
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.session-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Special border for pending sessions */
+.session-card .session-status.pending {
+    color: #8c0054;
+}
+
+.session-card:has(.session-status.pending) {
+    border-color: #8c0054;
+    border-width: 2px;
+}
+
+.week-group {
+    margin-bottom: 20px;
+}
+
+.week-header {
+    margin-bottom: 10px;
+}
+
+.week-sessions {
+    display: grid;
+    gap: 15px;
+}
+
+.current-week-badge {
+    background: #e3fcef;
+    color: #0d6832;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 8px;
+}
+
+.current-week {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 </style>
